@@ -27,7 +27,7 @@ export class AuthService {
         apiToken: apiResponse.token,
       };
     } catch (error) {
-
+      console.error('Erreur de connexion hybride:', error);
       throw error;
     }
   }
@@ -51,7 +51,7 @@ export class AuthService {
         apiToken: apiResponse.token,
       };
     } catch (error) {
-
+      console.error('Erreur d\'inscription hybride:', error);
       // Si l'API échoue mais Firebase réussit, on nettoie Firebase
       if (FIREBASE_AUTH.currentUser) {
         await signOut(FIREBASE_AUTH);
@@ -69,7 +69,7 @@ export class AuthService {
       // 2. Supprimer le token JWT
       await this.removeJwtToken();
     } catch (error) {
-
+      console.error('Erreur de déconnexion:', error);
       throw error;
     }
   }
@@ -103,7 +103,7 @@ export class AuthService {
 
       return token;
     } catch (error) {
-
+      console.error('Erreur lors de la récupération du token JWT:', error);
       return null;
     }
   }

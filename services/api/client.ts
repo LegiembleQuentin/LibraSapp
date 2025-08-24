@@ -1,12 +1,11 @@
 import { LoginUserDto, RegisterUserDto, LoginResponseDto, ApiError } from './types';
-import { API_CONFIG } from '../../config';
 
 // Configuration de l'API
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || API_CONFIG.BASE_URL;
-const API_KEY = process.env.EXPO_PUBLIC_API_KEY || API_CONFIG.API_KEY;
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8080/api';
+const API_KEY = process.env.EXPO_PUBLIC_API_KEY || '';
 
-
-
+console.log(API_BASE_URL);
+console.log(API_KEY);
 
 class ApiClient {
   private baseUrl: string;
@@ -28,7 +27,7 @@ class ApiClient {
     
     const defaultHeaders: HeadersInit = {
       'Content-Type': 'application/json',
-      'API-KEY': this.apiKey,
+      'API-Key': this.apiKey,
     };
 
     const config: RequestInit = {

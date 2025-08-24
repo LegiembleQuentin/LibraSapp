@@ -1,30 +1,36 @@
-import { useEffect } from "react";
+import { Redirect } from "expo-router";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { View, Text, ActivityIndicator } from "react-native";
-import { router } from "expo-router";
-import { useAuth } from "../hooks/useAuth";
 
 export default function Index() {
-  const { user, jwtToken, loading, isAuthenticated } = useAuth();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading) {
-      if (isAuthenticated) {
-        // L'utilisateur est connecté avec Firebase ET a un token JWT valide
-        console.log('🔄 Redirection vers /home');
-        router.replace("/home");
-      } else {
-        // L'utilisateur n'est pas connecté ou n'a pas de token JWT valide
-        console.log('🔄 Redirection vers /(auth)/Login');
-        router.replace("/(auth)/Login");
-      }
-    }
-  }, [loading, isAuthenticated]);
+    const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
+      setUser(user);
+      setLoading(false);
+    });
 
-  // Écran de chargement pendant la vérification de l'authentification
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
-      <ActivityIndicator size="large" color="#FFE815" />
-      <Text style={{ color: '#FFF', marginTop: 10 }}>Chargement...</Text>
-    </View>
-  );
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+        <Text>Chargement...</Text>
+      </View>
+    );
+  }
+
+  if (user) {
+    // L'utilisateur est connecté, aller aux onglets
+    return <Redirect href={"/(tabs)/discover" as any} />;
+  } else {
+    // L'utilisateur n'est pas connecté, rediriger vers la connexion
+    return <Redirect href={"/(auth)/Login" as any} />;
+  }
 }
