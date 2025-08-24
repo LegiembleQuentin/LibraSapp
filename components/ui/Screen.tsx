@@ -1,5 +1,6 @@
 import React, { PropsWithChildren } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme';
@@ -19,13 +20,23 @@ export default function Screen({ center, children }: ScreenProps) {
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
     >
-      <View style={[styles.content, center && styles.center]}>{children}</View>
+      <StatusBar style="light" translucent={true} />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboard}
+        keyboardVerticalOffset={24}
+      >
+        <View style={[styles.content, center && styles.center]}>{children}</View>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
+    flex: 1,
+  },
+  keyboard: {
     flex: 1,
   },
   content: {
