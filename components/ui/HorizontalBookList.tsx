@@ -1,6 +1,14 @@
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { BookDto } from '../../services/api/types';
+interface BookDto {
+  id: number;
+  names: string[];
+  imgUrl: string;
+  nbVolume: number;
+  userCurrentVolume?: number;
+  isCompleted?: boolean;
+  authors?: any[];
+}
 import BookCard from './BookCard';
 
 interface HorizontalBookListProps {
@@ -31,7 +39,7 @@ export default function HorizontalBookList({
         contentContainerStyle
       ]}
       decelerationRate="fast"
-      snapToInterval={variant === 'compact' ? 136 : 156} // 120 + 16 ou 140 + 16
+      snapToInterval={variant === 'compact' ? 98 : 98} // 90 + 8
     >
       {books.map((book) => (
         <BookCard
@@ -47,7 +55,7 @@ export default function HorizontalBookList({
 
 const styles = StyleSheet.create({
   container: {
-    paddingLeft: 16,
-    paddingRight: 16,
+    paddingLeft: 20,
+    paddingRight: 20,
   },
 });

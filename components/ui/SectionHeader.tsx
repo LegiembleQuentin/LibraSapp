@@ -17,7 +17,7 @@ export default function SectionHeader({ title, subtitle, variant = 'default' }: 
         <View style={[styles.yellowBar, { backgroundColor: theme.colors.accent }]} />
         <Text style={[
           styles.title,
-          { color: theme.colors.textPrimary },
+          { color: theme.colors.textPrimary, fontFamily: theme.fonts.heading },
           variant === 'large' && styles.titleLarge
         ]}>
           {title}
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   title: {
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: '600',
     flex: 1,
   },

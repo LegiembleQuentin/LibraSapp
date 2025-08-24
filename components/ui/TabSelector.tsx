@@ -30,7 +30,10 @@ export default function TabSelector({ tabs, activeTab, onTabChange }: TabSelecto
         >
           <Text style={[
             styles.tabLabel,
-            { color: activeTab === tab.id ? theme.colors.accent : theme.colors.textPrimary }
+            { 
+              color: activeTab === tab.id ? theme.colors.accent : theme.colors.textPrimary,
+              fontFamily: theme.fonts.heading
+            }
           ]}>
             {tab.label}
           </Text>
@@ -54,7 +57,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   tabLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
 });

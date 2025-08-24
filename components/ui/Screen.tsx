@@ -1,5 +1,5 @@
 import React, { PropsWithChildren } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,7 +26,17 @@ export default function Screen({ center, children }: ScreenProps) {
         style={styles.keyboard}
         keyboardVerticalOffset={24}
       >
-        <View style={[styles.content, center && styles.center]}>{children}</View>
+        {center ? (
+          <View style={[styles.content, styles.center]}>{children}</View>
+        ) : (
+          <ScrollView 
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+          >
+            {children}
+          </ScrollView>
+        )}
       </KeyboardAvoidingView>
     </LinearGradient>
   );
@@ -41,10 +51,13 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
   },
   center: {
     justifyContent: 'center',
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
 });
 

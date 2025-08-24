@@ -8,7 +8,7 @@ interface BookDto {
   imgUrl: string;
   nbVolume: number;
   userCurrentVolume?: number;
-  userStatus?: string;
+  isCompleted?: boolean;
   authors?: any[];
 }
 
@@ -23,30 +23,12 @@ const { width: screenWidth } = Dimensions.get('window');
 export default function BookCard({ book, variant = 'default', onPress }: BookCardProps) {
   const { theme } = useTheme();
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'COMPLETED':
-        return 'Complété';
-      case 'IN_PROGRESS':
-        return 'En cours';
-      case 'NOT_STARTED':
-        return 'Non commencé';
-      default:
-        return status || 'Non commencé';
-    }
+  const getStatusText = (isCompleted: boolean) => {
+    return isCompleted ? 'Complété' : 'En cours';
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'COMPLETED':
-        return '#4CAF50';
-      case 'IN_PROGRESS':
-        return '#FF9800';
-      case 'NOT_STARTED':
-        return '#9E9E9E';
-      default:
-        return theme.colors.textSecondary;
-    }
+  const getStatusColor = () => {
+    return '#FFFFFF';
   };
 
   const getVolumeText = () => {
@@ -80,8 +62,8 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
             <Text style={[styles.featuredVolumes, { color: theme.colors.textSecondary }]}>
               {getVolumeText()}
             </Text>
-            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(book.userStatus || '') }]}>
-              <Text style={styles.statusText}>{getStatusText(book.userStatus || '')}</Text>
+            <View style={[styles.statusBadge, { backgroundColor: getStatusColor() }]}>
+              <Text style={styles.statusText}>{getStatusText(book.isCompleted || false)}</Text>
             </View>
           </View>
         </View>
@@ -108,8 +90,8 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
           <Text style={[styles.compactVolumes, { color: theme.colors.textSecondary }]}>
             {getVolumeText()}
           </Text>
-          <Text style={[styles.compactStatus, { color: getStatusColor(book.userStatus || '') }]}>
-            {getStatusText(book.userStatus || '')}
+          <Text style={[styles.compactStatus, { color: getStatusColor() }]}>
+            {getStatusText(book.isCompleted || false)}
           </Text>
         </View>
       </TouchableOpacity>
@@ -134,8 +116,8 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
         <Text style={[styles.defaultVolumes, { color: theme.colors.textSecondary }]}>
           {getVolumeText()}
         </Text>
-        <Text style={[styles.compactStatus, { color: getStatusColor(book.userStatus || '') }]}>
-          {getStatusText(book.userStatus || '')}
+        <Text style={[styles.compactStatus, { color: getStatusColor() }]}>
+          {getStatusText(book.isCompleted || false)}
         </Text>
       </View>
     </TouchableOpacity>
@@ -188,62 +170,62 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   compactCard: {
-    width: 120,
-    marginRight: 16,
+    width: 78,
+    marginRight: 8,
     alignItems: 'center',
   },
   compactCover: {
-    width: 120,
-    height: 160,
-    borderRadius: 12,
+    width: 78,
+    height: 118,
+    borderRadius: 6,
     marginBottom: 12,
   },
   compactInfo: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     width: '100%',
   },
   compactTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: 4,
     lineHeight: 18,
   },
   compactVolumes: {
-    fontSize: 12,
+    fontSize: 10,
     marginBottom: 4,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   compactStatus: {
     fontSize: 11,
     fontWeight: '500',
-    textAlign: 'center',
+    textAlign: 'left',
   },
   defaultCard: {
-    width: 140,
-    marginRight: 16,
+    width: 90,
+    marginRight: 8,
     alignItems: 'center',
   },
   defaultCover: {
-    width: 140,
-    height: 180,
-    borderRadius: 12,
+    width: 90,
+    height: 130,
+    borderRadius: 6,
     marginBottom: 12,
   },
   defaultInfo: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     width: '100%',
   },
   defaultTitle: {
     fontSize: 16,
     fontWeight: '600',
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: 6,
     lineHeight: 20,
   },
   defaultVolumes: {
     fontSize: 14,
     marginBottom: 6,
-    textAlign: 'center',
+    textAlign: 'left',
   },
 });
