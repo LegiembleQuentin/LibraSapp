@@ -13,11 +13,12 @@ export default function Home() {
   const handleLogout = async () => {
     try {
       await authService.logout();
-      console.log('Déconnexion hybride réussie');
-      Alert.alert('Succès', 'Déconnexion réussie !');
-      // La navigation sera gérée par le listener Firebase dans index.tsx
+      // Petit délai pour laisser Firebase se synchroniser
+      setTimeout(() => {
+        router.replace("/(auth)/Login");
+      }, 100);
     } catch (error: any) {
-      console.error('Erreur de déconnexion hybride:', error);
+
       Alert.alert('Erreur', 'Erreur lors de la déconnexion');
     }
   };
@@ -25,10 +26,7 @@ export default function Home() {
   return (
     <Screen center>
       <View style={styles.container}>
-        <Text style={[styles.title, { color: theme.colors.textPrimary, fontFamily: theme.fonts.heading }]}>Bienvenue !</Text>
-        <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-          Vous êtes connecté en tant que : {user?.email}
-        </Text>
+        <Text style={[styles.title, { color: theme.colors.textPrimary, fontFamily: theme.fonts.heading }]}>Bonjour</Text>
         
         <View style={styles.buttonContainer}>
           <PrimaryButton 
@@ -43,21 +41,13 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 12,
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 30,
-    color: '#666',
+    marginBottom: 40,
   },
   buttonContainer: {
     width: '100%',

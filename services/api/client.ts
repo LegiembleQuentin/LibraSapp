@@ -1,8 +1,11 @@
 import { LoginUserDto, RegisterUserDto, LoginResponseDto, ApiError } from './types';
+import { API_CONFIG } from '../../config';
 
 // Configuration de l'API
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || '';
-const API_KEY = process.env.EXPO_PUBLIC_API_KEY || '';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || API_CONFIG.BASE_URL;
+const API_KEY = process.env.EXPO_PUBLIC_API_KEY || API_CONFIG.API_KEY;
+
+
 
 
 class ApiClient {

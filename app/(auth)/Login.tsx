@@ -53,14 +53,12 @@ const Login = () => {
         setLoading(true);
         try {
             const result = await authService.login(email, password);
-            console.log('Connexion hybride réussie:', {
-                firebaseUser: result.firebaseUser.email,
-                hasApiToken: !!result.apiToken
-            });
-            Alert.alert('Succès', 'Connexion réussie !');
-            // La navigation sera gérée par le listener Firebase dans index.tsx
+            // Petit délai pour laisser Firebase se synchroniser
+            setTimeout(() => {
+                router.replace("/home");
+            }, 100);
         } catch (error: any) {
-            console.error('Erreur de connexion hybride:', error);
+
             setPasswordError('Identifiants incorrects');
         } finally {
             setLoading(false);

@@ -69,14 +69,12 @@ const Register = () => {
             const displayname = email.split('@')[0]; // Utilise la partie avant @ comme nom d'affichage
             
             const result = await authService.register(email, password, displayname);
-            console.log('Inscription hybride réussie:', {
-                firebaseUser: result.firebaseUser.email,
-                hasApiToken: !!result.apiToken
-            });
-            Alert.alert('Succès', 'Compte créé avec succès !');
-            // La navigation sera gérée par le listener Firebase dans index.tsx
+            // Petit délai pour laisser Firebase se synchroniser
+            setTimeout(() => {
+                router.replace("/home");
+            }, 100);
         } catch (error: any) {
-            console.error('Erreur d\'inscription hybride:', error);
+
             
             // Gestion d'erreurs spécifiques Firebase/API
             if (error.message?.includes('email-already-in-use') || error.message?.includes('déjà utilisé')) {
