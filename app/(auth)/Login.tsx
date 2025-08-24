@@ -1,8 +1,7 @@
 import { View, Text, StyleSheet, Alert } from 'react-native'
 import { useState } from 'react'
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { router } from 'expo-router';
+import { authService } from '../../services/auth/authService';
 import Screen from '../../components/ui/Screen';
 import Input from '../../components/ui/Input';
 import PrimaryButton from '../../components/ui/PrimaryButton';
@@ -15,7 +14,6 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
-    const auth = FIREBASE_AUTH;
 
     const validateEmail = (email: string): boolean => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -54,12 +52,15 @@ const Login = () => {
 
         setLoading(true);
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            console.log('Utilisateur connecté:', user.email);
+            const result = await authService.login(email, password);
+            console.log('Connexion hybride réussie:', {
+                firebaseUser: result.firebaseUser.email,
+                hasApiToken: !!result.apiToken
+            });
             Alert.alert('Succès', 'Connexion réussie !');
+            // La navigation sera gérée par le listener Firebase dans index.tsx
         } catch (error: any) {
-            console.error('Erreur de connexion:', error);
+            console.error('Erreur de connexion hybride:', error);
             setPasswordError('Identifiants incorrects');
         } finally {
             setLoading(false);

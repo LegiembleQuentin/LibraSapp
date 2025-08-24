@@ -1,8 +1,7 @@
 import { View, Text, StyleSheet, Alert } from 'react-native'
 import { useState } from 'react'
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { router } from 'expo-router';
+import { authService } from '../../services/auth/authService';
 import Screen from '../../components/ui/Screen';
 import Input from '../../components/ui/Input';
 import PrimaryButton from '../../components/ui/PrimaryButton';
@@ -17,7 +16,6 @@ const Register = () => {
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [confirmPasswordError, setConfirmPasswordError] = useState('');
-    const auth = FIREBASE_AUTH;
 
     const validateEmail = (email: string): boolean => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -67,30 +65,28 @@ const Register = () => {
 
         setLoading(true);
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            console.log('Utilisateur créé:', user.email);
-            Alert.alert('Succès', 'Compte créé avec succès !', [
-                {
-                    text: 'OK',
-                    onPress: () => router.replace('/home' as any)
-                }
-            ]);
-        } catch (error: any) {
-            console.error('Erreur d\'inscription:', error);
+            // Utiliser l'email comme displayname par défaut si pas fourni
+            const displayname = email.split('@')[0]; // Utilise la partie avant @ comme nom d'affichage
             
-            switch (error.code) {
-                case 'auth/email-already-in-use':
-                    setEmailError('Cet email est déjà utilisé');
-                    break;
-                case 'auth/invalid-email':
-                    setEmailError('Email invalide');
-                    break;
-                case 'auth/weak-password':
-                    setPasswordError('Le mot de passe est trop faible');
-                    break;
-                default:
-                    setEmailError('Erreur lors de la création du compte');
+            const result = await authService.register(email, password, displayname);
+            console.log('Inscription hybride réussie:', {
+                firebaseUser: result.firebaseUser.email,
+                hasApiToken: !!result.apiToken
+            });
+            Alert.alert('Succès', 'Compte créé avec succès !');
+            // La navigation sera gérée par le listener Firebase dans index.tsx
+        } catch (error: any) {
+            console.error('Erreur d\'inscription hybride:', error);
+            
+            // Gestion d'erreurs spécifiques Firebase/API
+            if (error.message?.includes('email-already-in-use') || error.message?.includes('déjà utilisé')) {
+                setEmailError('Cet email est déjà utilisé');
+            } else if (error.message?.includes('invalid-email') || error.message?.includes('Email invalide')) {
+                setEmailError('Email invalide');
+            } else if (error.message?.includes('weak-password') || error.message?.includes('trop faible')) {
+                setPasswordError('Le mot de passe est trop faible');
+            } else {
+                setEmailError('Erreur lors de la création du compte');
             }
         } finally {
             setLoading(false);

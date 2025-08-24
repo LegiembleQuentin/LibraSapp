@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Alert } from 'react-native';
-import { signOut } from 'firebase/auth';
 import { FIREBASE_AUTH } from '../FirebaseConfig';
 import { router } from 'expo-router';
+import { authService } from '../services/auth/authService';
 import Screen from '../components/ui/Screen';
 import PrimaryButton from '../components/ui/PrimaryButton';
 import { useTheme } from '../theme';
@@ -12,12 +12,12 @@ export default function Home() {
 
   const handleLogout = async () => {
     try {
-      await signOut(FIREBASE_AUTH);
-      console.log('Utilisateur déconnecté');
+      await authService.logout();
+      console.log('Déconnexion hybride réussie');
       Alert.alert('Succès', 'Déconnexion réussie !');
-      router.replace('/(auth)/Login' as any);
+      // La navigation sera gérée par le listener Firebase dans index.tsx
     } catch (error: any) {
-      console.error('Erreur de déconnexion:', error);
+      console.error('Erreur de déconnexion hybride:', error);
       Alert.alert('Erreur', 'Erreur lors de la déconnexion');
     }
   };
