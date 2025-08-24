@@ -1,29 +1,33 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Stack } from "expo-router";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
+import { ThemeProvider } from "../theme";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const [user, setUser] = useState<User | null>(null);
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
+      console.log('État d\'authentification changé:', user?.email || 'Aucun utilisateur');
+      setUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
+    <ThemeProvider>
+      <Stack screenOptions={{
+        headerShown: false,
+        animation: 'slide_from_right',
+        gestureEnabled: true,
+        contentStyle: { backgroundColor: 'transparent' },
+      }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="home" />
       </Stack>
-      <StatusBar style="auto" />
     </ThemeProvider>
   );
 }
