@@ -1,8 +1,13 @@
-import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native'
+import { View, Text, StyleSheet, Alert } from 'react-native'
 import { useState } from 'react'
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { router } from 'expo-router';
+import Screen from '../../components/ui/Screen';
+import Input from '../../components/ui/Input';
+import PrimaryButton from '../../components/ui/PrimaryButton';
+import LinkButton from '../../components/ui/LinkButton';
+import { useTheme } from '../../theme';
 
 const Register = () => {
     const [email, setEmail] = useState('');
@@ -66,86 +71,69 @@ const Register = () => {
         router.push('/(auth)/Login' as any);
     }
 
-    return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Créer un compte</Text>
-            
-            <View style={styles.inputContainer}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Email"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoComplete="email"
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Mot de passe"
-                    secureTextEntry={true}
-                    value={password}
-                    onChangeText={setPassword}
-                    autoComplete="password-new"
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Confirmer le mot de passe"
-                    secureTextEntry={true}
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                    autoComplete="password-new"
-                />
-            </View>
+    const { theme } = useTheme();
 
-            <View style={styles.buttonContainer}>
-                <Button 
-                    title={loading ? "Création..." : "Créer un compte"} 
-                    onPress={handleRegister} 
-                    disabled={loading}
-                />
+    return (
+        <Screen center>
+            <View style={styles.container}>
+                <Text style={[styles.title, { color: theme.colors.textPrimary, fontFamily: theme.fonts.heading }]}>Inscription</Text>
                 
-                <View style={styles.linkContainer}>
-                    <Text style={styles.linkText}>Déjà un compte ?</Text>
-                    <Button 
-                        title="Se connecter" 
-                        onPress={goToLogin}
-                        color="#007AFF"
+                <View style={styles.inputContainer}>
+                    <Input
+                        placeholder="Email"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        autoComplete="email"
+                    />
+                    <Input
+                        placeholder="Mot de passe"
+                        secureTextEntry={true}
+                        value={password}
+                        onChangeText={setPassword}
+                        autoComplete="password-new"
+                    />
+                    <Input
+                        placeholder="Confirmer le mot de passe"
+                        secureTextEntry={true}
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                        autoComplete="password-new"
                     />
                 </View>
+
+                <View style={styles.buttonContainer}>
+                    <PrimaryButton 
+                        title={loading ? 'Création...' : 'Valider'} 
+                        onPress={handleRegister} 
+                        disabled={loading}
+                    />
+                    
+                    <View style={styles.linkContainer}>
+                        <Text style={[styles.linkText, { color: theme.colors.textPrimary }]}>Vous avez déjà un compte ?</Text>
+                        <LinkButton title={'Se connecter'} onPress={goToLogin} />
+                    </View>
+                </View>
             </View>
-        </View>
+        </Screen>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        justifyContent: 'center',
         alignItems: 'center',
-        padding: 20,
-        backgroundColor: '#f5f5f5',
+        paddingHorizontal: 12,
     },
     title: {
         fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 30,
-        color: '#333',
     },
     inputContainer: {
         width: '100%',
         maxWidth: 300,
         marginBottom: 20,
-    },
-    input: {
-        backgroundColor: 'white',
-        paddingHorizontal: 15,
-        paddingVertical: 12,
-        borderRadius: 8,
-        marginBottom: 15,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        fontSize: 16,
     },
     buttonContainer: {
         width: '100%',
@@ -157,7 +145,6 @@ const styles = StyleSheet.create({
     },
     linkText: {
         marginBottom: 10,
-        color: '#666',
         fontSize: 16,
     },
 })
