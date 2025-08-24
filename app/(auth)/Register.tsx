@@ -27,12 +27,10 @@ const Register = () => {
     };
 
     const handleRegister = async () => {
-        // Reset errors
         setEmailError('');
         setPasswordError('');
         setConfirmPasswordError('');
 
-        // Validation côté client
         if (!email) {
             setEmailError('Email requis');
             return;

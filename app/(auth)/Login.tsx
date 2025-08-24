@@ -25,11 +25,9 @@ const Login = () => {
     };
 
     const handleLogin = async () => {
-        // Reset errors
         setEmailError('');
         setPasswordError('');
 
-        // Validation côté client
         if (!email) {
             setEmailError('Email requis');
             return;
