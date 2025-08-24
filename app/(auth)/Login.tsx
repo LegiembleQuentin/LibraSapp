@@ -13,11 +13,42 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const auth = FIREBASE_AUTH;
 
+    const validateEmail = (email: string): boolean => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const validatePassword = (password: string): boolean => {
+        return password.length >= 4 && password.length <= 30;
+    };
+
     const handleLogin = async () => {
-        if (!email || !password) {
-            Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+        // Reset errors
+        setEmailError('');
+        setPasswordError('');
+
+        // Validation côté client
+        if (!email) {
+            setEmailError('Email requis');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            setEmailError('Format d\'email invalide');
+            return;
+        }
+
+        if (!password) {
+            setPasswordError('Mot de passe requis');
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            setPasswordError('Mot de passe entre 4 et 30 caractères');
             return;
         }
 
@@ -29,26 +60,7 @@ const Login = () => {
             Alert.alert('Succès', 'Connexion réussie !');
         } catch (error: any) {
             console.error('Erreur de connexion:', error);
-            let errorMessage = 'Erreur de connexion';
-            
-            switch (error.code) {
-                case 'auth/user-not-found':
-                    errorMessage = 'Aucun utilisateur trouvé avec cet email';
-                    break;
-                case 'auth/wrong-password':
-                    errorMessage = 'Mot de passe incorrect';
-                    break;
-                case 'auth/invalid-email':
-                    errorMessage = 'Email invalide';
-                    break;
-                case 'auth/user-disabled':
-                    errorMessage = 'Ce compte a été désactivé';
-                    break;
-                default:
-                    errorMessage = error.message;
-            }
-            
-            Alert.alert('Erreur', errorMessage);
+            setPasswordError('Identifiants incorrects');
         } finally {
             setLoading(false);
         }
@@ -75,6 +87,7 @@ const Login = () => {
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
+            error={emailError}
           />
           <Input
             placeholder="Mot de passe"
@@ -82,6 +95,7 @@ const Login = () => {
             value={password}
             onChangeText={setPassword}
             autoComplete="password"
+            error={passwordError}
           />
         </View>
 

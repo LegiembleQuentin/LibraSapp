@@ -14,21 +14,54 @@ const Register = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [confirmPasswordError, setConfirmPasswordError] = useState('');
     const auth = FIREBASE_AUTH;
 
+    const validateEmail = (email: string): boolean => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const validatePassword = (password: string): boolean => {
+        return password.length >= 4 && password.length <= 30;
+    };
+
     const handleRegister = async () => {
-        if (!email || !password || !confirmPassword) {
-            Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+        // Reset errors
+        setEmailError('');
+        setPasswordError('');
+        setConfirmPasswordError('');
+
+        // Validation côté client
+        if (!email) {
+            setEmailError('Email requis');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            setEmailError('Format d\'email invalide');
+            return;
+        }
+
+        if (!password) {
+            setPasswordError('Mot de passe requis');
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            setPasswordError('Mot de passe entre 4 et 30 caractères');
+            return;
+        }
+
+        if (!confirmPassword) {
+            setConfirmPasswordError('Confirmation requise');
             return;
         }
 
         if (password !== confirmPassword) {
-            Alert.alert('Erreur', 'Les mots de passe ne correspondent pas');
-            return;
-        }
-
-        if (password.length < 6) {
-            Alert.alert('Erreur', 'Le mot de passe doit contenir au moins 6 caractères');
+            setConfirmPasswordError('Les mots de passe ne correspondent pas');
             return;
         }
 
@@ -45,23 +78,20 @@ const Register = () => {
             ]);
         } catch (error: any) {
             console.error('Erreur d\'inscription:', error);
-            let errorMessage = 'Erreur lors de la création du compte';
             
             switch (error.code) {
                 case 'auth/email-already-in-use':
-                    errorMessage = 'Cet email est déjà utilisé';
+                    setEmailError('Cet email est déjà utilisé');
                     break;
                 case 'auth/invalid-email':
-                    errorMessage = 'Email invalide';
+                    setEmailError('Email invalide');
                     break;
                 case 'auth/weak-password':
-                    errorMessage = 'Le mot de passe est trop faible';
+                    setPasswordError('Le mot de passe est trop faible');
                     break;
                 default:
-                    errorMessage = error.message;
+                    setEmailError('Erreur lors de la création du compte');
             }
-            
-            Alert.alert('Erreur', errorMessage);
         } finally {
             setLoading(false);
         }
@@ -86,6 +116,7 @@ const Register = () => {
                         keyboardType="email-address"
                         autoCapitalize="none"
                         autoComplete="email"
+                        error={emailError}
                     />
                     <Input
                         placeholder="Mot de passe"
@@ -93,6 +124,7 @@ const Register = () => {
                         value={password}
                         onChangeText={setPassword}
                         autoComplete="password-new"
+                        error={passwordError}
                     />
                     <Input
                         placeholder="Confirmer le mot de passe"
@@ -100,6 +132,7 @@ const Register = () => {
                         value={confirmPassword}
                         onChangeText={setConfirmPassword}
                         autoComplete="password-new"
+                        error={confirmPasswordError}
                     />
                 </View>
 
