@@ -52,13 +52,12 @@ const Login = () => {
 
         setLoading(true);
         try {
-            const result = await authService.login(email, password);
-            // Petit délai pour laisser Firebase se synchroniser
+            await authService.login(email, password);
+            // Redirection immédiate vers les onglets et nettoyage de la stack
             setTimeout(() => {
-                router.replace("/home");
+                router.replace('/(tabs)/discover' as any);
             }, 100);
         } catch (error: any) {
-
             setPasswordError('Identifiants incorrects');
         } finally {
             setLoading(false);

@@ -66,15 +66,13 @@ const Register = () => {
         setLoading(true);
         try {
             // Utiliser l'email comme displayname par défaut si pas fourni
-            const displayname = email.split('@')[0]; // Utilise la partie avant @ comme nom d'affichage
-            
-            const result = await authService.register(email, password, displayname);
-            // Petit délai pour laisser Firebase se synchroniser
+            const displayname = email.split('@')[0];
+            await authService.register(email, password, displayname);
+            // Redirection immédiate vers les onglets et nettoyage de la stack
             setTimeout(() => {
-                router.replace("/home");
+                router.replace('/(tabs)/discover' as any);
             }, 100);
         } catch (error: any) {
-
             
             // Gestion d'erreurs spécifiques Firebase/API
             if (error.message?.includes('email-already-in-use') || error.message?.includes('déjà utilisé')) {

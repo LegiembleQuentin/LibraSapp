@@ -27,8 +27,6 @@ export const useAuth = () => {
   }, []);
 
   const isAuthenticated = !loading && user !== null && jwtToken !== null;
-  
-
 
   return {
     user,
