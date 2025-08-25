@@ -10,7 +10,7 @@ interface CarouselBannerProps {
 
 const { width: screenWidth } = Dimensions.get('window');
 const CARD_WIDTH = screenWidth - 32; // Largeur de la carte
-const CARD_HEIGHT = 200;
+const CARD_HEIGHT = 180;
 const CARD_SPACING = 16; // Espacement entre les cartes
 const TOTAL_CARD_WIDTH = CARD_WIDTH + CARD_SPACING; // Largeur totale incluant l'espacement
 
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: 16,
-    paddingRight: 32, // Espace supplémentaire à droite pour la dernière carte
+    paddingRight: 0, // Espace supplémentaire à droite pour la dernière carte
   },
   card: {
     width: CARD_WIDTH,
@@ -138,29 +138,38 @@ const styles = StyleSheet.create({
   overlay: {
     position: 'absolute',
     bottom: 16,
-    right: 16,
-    alignItems: 'flex-end',
+    left: 16,
+    alignItems: 'flex-start',
   },
   info: {
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 4,
+    textShadowColor: '#000000',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+    marginBottom: 2,
     fontFamily: 'Orbitron',
     textAlign: 'right',
   },
   volumes: {
     fontSize: 14,
     color: '#FFFFFF',
-    marginBottom: 6,
+    textShadowColor: '#000000',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+    marginBottom: 2,
     opacity: 0.9,
     textAlign: 'right',
   },
   statusText: {
     color: '#FFFFFF',
+    textShadowColor: '#000000',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
     fontSize: 12,
     fontWeight: '500',
     textAlign: 'right',
