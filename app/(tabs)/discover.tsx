@@ -5,6 +5,7 @@ import { apiClient } from '../../services/api/client';
 import Screen from '../../components/ui/Screen';
 import Header from '../../components/ui/Header';
 import BookCard from '../../components/ui/BookCard';
+import CarouselBanner from '../../components/ui/CarouselBanner';
 import SectionHeader from '../../components/ui/SectionHeader';
 import HorizontalBookList from '../../components/ui/HorizontalBookList';
 import { useTheme } from '../../theme';
@@ -108,12 +109,11 @@ export default function Discover() {
         onTabChange={handleTabChange}
       />
 
-      {/* Livre mis en avant (carroussel) */}
-      {discoverData?.carrousselBooks && discoverData.carrousselBooks.length > 0 && (
-        <BookCard
-          book={discoverData.carrousselBooks[0]}
-          variant="featured"
-          onPress={() => handleBookPress(discoverData.carrousselBooks[0])}
+      {/* Bannière carrousel avec les 3 premiers livres populaires */}
+      {discoverData?.popular && discoverData.popular.length > 0 && (
+        <CarouselBanner
+          books={discoverData.popular}
+          onBookPress={handleBookPress}
         />
       )}
 

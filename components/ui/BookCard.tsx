@@ -1,16 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useTheme } from '../../theme';
-
-interface BookDto {
-  id: number;
-  names: string[];
-  imgUrl: string;
-  nbVolume: number;
-  userCurrentVolume?: number;
-  isCompleted?: boolean;
-  authors?: any[];
-}
+import { BookDto } from '../../types/book';
 
 interface BookCardProps {
   book: BookDto;

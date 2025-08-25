@@ -1,14 +1,6 @@
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-interface BookDto {
-  id: number;
-  names: string[];
-  imgUrl: string;
-  nbVolume: number;
-  userCurrentVolume?: number;
-  isCompleted?: boolean;
-  authors?: any[];
-}
+import { BookDto } from '../../types/book';
 import BookCard from './BookCard';
 
 interface HorizontalBookListProps {
