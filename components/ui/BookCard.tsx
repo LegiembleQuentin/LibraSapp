@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     width: 78,
     height: 118,
     borderRadius: 6,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   compactInfo: {
     alignItems: 'flex-start',
@@ -179,12 +179,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'left',
-    marginBottom: 4,
+    marginBottom: 2,
     lineHeight: 18,
   },
   compactVolumes: {
     fontSize: 10,
-    marginBottom: 4,
+    marginBottom: 1,
     textAlign: 'left',
   },
   compactStatus: {

@@ -212,6 +212,8 @@ const styles = StyleSheet.create({
       ios: { shadowOpacity: 0.16, shadowRadius: 8, shadowOffset: { width: 0, height: -3 } },
       android: { elevation: 10 },
     }),
+    boxShadow: '0px 0px 30px 0px rgba(194, 223, 250, 0.5)',
+
   },
   row: {
     height: BAR_HEIGHT,
@@ -243,6 +245,8 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     alignSelf: 'center',
+    //descendre legerement le fab
+    transform: [{ translateY: 10 }],
     ...Platform.select({
       ios: { shadowOpacity: 0.35, shadowRadius: 16, shadowOffset: { width: 0, height: 8 } },
       android: { elevation: 18 },

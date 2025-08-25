@@ -7,3 +7,8 @@ export interface BookDto {
   isCompleted?: boolean;
   authors?: any[];
 }
+
+export interface Tag {
+  id: string;
+  name: string;
+}

@@ -84,6 +84,24 @@ class ApiClient {
   async getDiscoverPage(token: string) {
     return this.makeAuthenticatedRequest('/books/discover', token);
   }
+
+  async getTags(token: string) {
+    return this.makeAuthenticatedRequest('/tags', token, {
+      method: 'GET',
+    });
+  }
+
+  async getBooksByTags(token: string, tags: any[]) {
+    // L'API attend des objets TagDto complets avec id et name
+    console.log('Sending request to /books/by-tags with body:', tags);
+    
+    return this.makeAuthenticatedRequest('/books/by-tags', token, {
+      method: 'POST',
+      body: JSON.stringify(tags),
+    });
+  }
+
+
 }
 
 export const apiClient = new ApiClient();

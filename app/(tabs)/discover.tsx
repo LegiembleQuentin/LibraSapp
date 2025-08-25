@@ -5,6 +5,7 @@ import { apiClient } from '../../services/api/client';
 import Screen from '../../components/ui/Screen';
 import Header from '../../components/ui/Header';
 import ForYouContent from '../../components/content/ForYouContent';
+import ByTagContent from '../../components/content/ByTagContent';
 import { useTheme } from '../../theme';
 
 const tabs = [
@@ -114,11 +115,10 @@ export default function Discover() {
 
       {/* TODO: Ajouter les composants pour "Par tag" et "Récent" */}
       {activeTab === 'par-tag' && (
-        <View style={styles.placeholderContainer}>
-          <Text style={[styles.placeholderText, { color: theme.colors.textSecondary }]}>
-            Page "Par tag" - À implémenter
-          </Text>
-        </View>
+        <ByTagContent
+          jwtToken={jwtToken!}
+          onBookPress={handleBookPress}
+        />
       )}
 
       {activeTab === 'recent' && (
