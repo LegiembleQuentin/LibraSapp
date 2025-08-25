@@ -7,6 +7,7 @@ import Screen from '../../components/ui/Screen';
 import Header from '../../components/ui/Header';
 import ForYouContent from '../../components/content/ForYouContent';
 import ByTagContent from '../../components/content/ByTagContent';
+import RecentContent from '../../components/content/RecentContent';
 import { useTheme } from '../../theme';
 
 const tabs = [
@@ -125,13 +126,12 @@ export default function Discover() {
         />
       )}
 
-      {activeTab === 'recent' && (
-        <View style={styles.placeholderContainer}>
-          <Text style={[styles.placeholderText, { color: theme.colors.textSecondary }]}>
-            Page "Récent" - À implémenter
-          </Text>
-        </View>
-      )}
+                        {activeTab === 'recent' && (
+                    <RecentContent
+                      jwtToken={jwtToken!}
+                      onBookPress={handleBookPress}
+                    />
+                  )}
     </Screen>
   );
 }
@@ -177,17 +177,7 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 22,
   },
-  placeholderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  placeholderText: {
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
+  
 });
 
 

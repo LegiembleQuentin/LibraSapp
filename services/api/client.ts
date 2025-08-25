@@ -105,6 +105,12 @@ class ApiClient {
     });
   }
 
+  async getRecentBooks(token: string) {
+    return this.makeAuthenticatedRequest('/books/recent', token, {
+      method: 'GET',
+    });
+  }
+
 }
 
 export const apiClient = new ApiClient();

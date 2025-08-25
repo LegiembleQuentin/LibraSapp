@@ -35,7 +35,7 @@ export default function Navbar({ state, descriptors, navigation }: BottomTabBarP
   };
 
   const scanIndex = state.routes.findIndex((r) => r.name.toLowerCase().includes('scan'));
-  const routesWithoutScan = state.routes.filter((_, i) => i !== scanIndex);
+  const routesWithoutScan = state.routes.filter((_, i) => i !== scanIndex && i !== state.routes.findIndex((r) => r.name.toLowerCase().includes('book-details')));
   const middle = Math.ceil(routesWithoutScan.length / 2);
   const leftRoutes = routesWithoutScan.slice(0, middle);
   const rightRoutes = routesWithoutScan.slice(middle);
