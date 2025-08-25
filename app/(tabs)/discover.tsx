@@ -34,11 +34,7 @@ export default function Discover() {
       setLoading(true);
       setError(null);
       
-      console.log('Appel API vers /api/books/discover...');
       const data = await apiClient.getDiscoverPage(jwtToken!);
-      console.log('Réponse API reçue:', data);
-      console.log('Type de données:', typeof data);
-      console.log('Clés disponibles:', Object.keys(data || {}));
       
       setDiscoverData(data);
     } catch (err: any) {
@@ -56,7 +52,6 @@ export default function Discover() {
 
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
-    console.log('Onglet changé:', tabId);
   };
 
   if (loading) {
@@ -236,7 +231,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   section: {
-    marginBottom: 32,
+    marginBottom: 22,
   },
 });
 
