@@ -1,0 +1,130 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { useTheme } from '../../theme';
+import { BookDto } from '../../types/book';
+import BookRow from '../ui/BookRow';
+import { apiClient } from '../../services/api/client';
+
+interface RecentContentProps {
+  jwtToken: string;
+  onBookPress: (book: BookDto) => void;
+}
+
+export default function RecentContent({ jwtToken, onBookPress }: RecentContentProps) {
+  const { theme } = useTheme();
+  const [books, setBooks] = useState<BookDto[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Charger les livres récents au montage du composant
+    fetchRecentBooks();
+  }, []);
+
+  const fetchRecentBooks = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const data = await apiClient.getRecentBooks(jwtToken) as BookDto[];
+      setBooks(data);
+    } catch (err: any) {
+      console.error('Erreur lors du chargement des livres récents:', err);
+      setError(err.message || 'Erreur lors du chargement des livres récents');
+      setBooks([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [jwtToken]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.accent} />
+        <Text style={[styles.loadingText, { color: theme.colors.textPrimary }]}>
+          Chargement des livres récents...
+        </Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={[styles.errorText, { color: theme.colors.textSecondary }]}>
+          {error}
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <ScrollView
+        style={styles.booksContainer}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.booksContent}
+      >
+        {books.length > 0 ? (
+          books.map((book) => (
+            <BookRow
+              key={book.id}
+              book={book}
+              onPress={onBookPress}
+            />
+          ))
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+              Aucun livre récent disponible pour le moment
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  errorText: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  booksContainer: {
+    flex: 1,
+  },
+  booksContent: {
+    paddingBottom: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingTop: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+});

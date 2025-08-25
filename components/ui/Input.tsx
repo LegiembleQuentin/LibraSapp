@@ -17,11 +17,10 @@ export default function Input({ style, error, ...rest }: Props) {
           styles.input,
           {
             backgroundColor: theme.colors.inputBackground,
-            color: '#000000', // Texte en noir pour être visible
+            color: '#000000',
             borderRadius: theme.radii.pill,
             ...(Platform.OS === 'android' ? { elevation: theme.shadows.input.elevation } : {}),
             ...theme.shadows.input,
-            // Ombre jaune lumineuse
             shadowColor: theme.colors.accent,
             shadowOffset: { width: 0, height: 0 },
             shadowOpacity: 0.3,

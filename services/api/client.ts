@@ -1,11 +1,8 @@
 import { LoginUserDto, RegisterUserDto, LoginResponseDto, ApiError } from './types';
 
 // Configuration de l'API
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || '';
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY || '';
-
-console.log(API_BASE_URL);
-console.log(API_KEY);
 
 class ApiClient {
   private baseUrl: string;
@@ -22,9 +19,6 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
-    console.log(url);
-    
-    
     const defaultHeaders: HeadersInit = {
       'Content-Type': 'application/json',
       'API-Key': this.apiKey,
@@ -48,7 +42,6 @@ class ApiClient {
 
       return await response.json();
     } catch (error) {
-      console.error('API Request failed:', error);
       throw error;
     }
   }
@@ -91,6 +84,33 @@ class ApiClient {
   async getDiscoverPage(token: string) {
     return this.makeAuthenticatedRequest('/books/discover', token);
   }
+
+  async getTags(token: string) {
+    return this.makeAuthenticatedRequest('/tags', token, {
+      method: 'GET',
+    });
+  }
+
+  async getBooksByTags(token: string, tags: any[]) {
+    // L'API attend des objets TagDto complets avec id et name
+    return this.makeAuthenticatedRequest('/books/by-tags', token, {
+      method: 'POST',
+      body: JSON.stringify(tags),
+    });
+  }
+
+  async getBookDetails(bookId: number, token: string) {
+    return this.makeAuthenticatedRequest(`/book-details/${bookId}`, token, {
+      method: 'GET',
+    });
+  }
+
+  async getRecentBooks(token: string) {
+    return this.makeAuthenticatedRequest('/books/recent', token, {
+      method: 'GET',
+    });
+  }
+
 }
 
 export const apiClient = new ApiClient();

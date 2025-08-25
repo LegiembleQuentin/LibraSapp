@@ -35,7 +35,7 @@ export default function Navbar({ state, descriptors, navigation }: BottomTabBarP
   };
 
   const scanIndex = state.routes.findIndex((r) => r.name.toLowerCase().includes('scan'));
-  const routesWithoutScan = state.routes.filter((_, i) => i !== scanIndex);
+  const routesWithoutScan = state.routes.filter((_, i) => i !== scanIndex && i !== state.routes.findIndex((r) => r.name.toLowerCase().includes('book-details')));
   const middle = Math.ceil(routesWithoutScan.length / 2);
   const leftRoutes = routesWithoutScan.slice(0, middle);
   const rightRoutes = routesWithoutScan.slice(middle);
@@ -212,6 +212,8 @@ const styles = StyleSheet.create({
       ios: { shadowOpacity: 0.16, shadowRadius: 8, shadowOffset: { width: 0, height: -3 } },
       android: { elevation: 10 },
     }),
+    boxShadow: '0px 0px 30px 0px rgba(194, 223, 250, 0.5)',
+
   },
   row: {
     height: BAR_HEIGHT,
@@ -243,6 +245,8 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     alignSelf: 'center',
+    //descendre legerement le fab
+    transform: [{ translateY: 10 }],
     ...Platform.select({
       ios: { shadowOpacity: 0.35, shadowRadius: 16, shadowOffset: { width: 0, height: 8 } },
       android: { elevation: 18 },
