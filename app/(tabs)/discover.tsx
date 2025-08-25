@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { router } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../services/api/client';
 import Screen from '../../components/ui/Screen';
@@ -46,7 +47,10 @@ export default function Discover() {
   };
 
   const handleBookPress = (book: any) => {
-    Alert.alert('Livre sélectionné', `Vous avez sélectionné : ${book.title}`);
+    router.push({
+      pathname: '/(tabs)/book-details/[id]',
+      params: { id: book.id.toString() }
+    });
   };
 
   const handleTabChange = (tabId: string) => {

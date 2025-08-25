@@ -99,6 +99,11 @@ class ApiClient {
     });
   }
 
+  async getBookDetails(bookId: number, token: string) {
+    return this.makeAuthenticatedRequest(`/book-details/${bookId}`, token, {
+      method: 'GET',
+    });
+  }
 
 }
 
