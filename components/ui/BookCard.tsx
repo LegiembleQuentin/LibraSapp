@@ -6,13 +6,17 @@ import { BookDto } from '../../types/book';
 interface BookCardProps {
   book: BookDto;
   variant?: 'default' | 'featured' | 'compact';
-  onPress?: () => void;
+  onPress?: (book: BookDto) => void;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function BookCard({ book, variant = 'default', onPress }: BookCardProps) {
   const { theme } = useTheme();
+
+  const handlePress = () => {
+    onPress?.(book);
+  };
 
   const getStatusText = (isCompleted: boolean) => {
     return isCompleted ? 'Complété' : 'En cours';
@@ -37,7 +41,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
     return (
       <TouchableOpacity
         style={[styles.featuredCard, { backgroundColor: theme.colors.card }]}
-        onPress={onPress}
+        onPress={handlePress}
         activeOpacity={0.8}
       >
         <Image
@@ -66,7 +70,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
     return (
       <TouchableOpacity
         style={styles.compactCard}
-        onPress={onPress}
+        onPress={handlePress}
         activeOpacity={0.8}
       >
         <Image
@@ -92,7 +96,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
   return (
     <TouchableOpacity
       style={[styles.defaultCard, { backgroundColor: theme.colors.card }]}
-      onPress={onPress}
+      onPress={handlePress}
       activeOpacity={0.8}
     >
       <Image
