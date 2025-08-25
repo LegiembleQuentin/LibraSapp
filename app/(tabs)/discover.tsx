@@ -4,10 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../services/api/client';
 import Screen from '../../components/ui/Screen';
 import Header from '../../components/ui/Header';
-import BookCard from '../../components/ui/BookCard';
-import CarouselBanner from '../../components/ui/CarouselBanner';
-import SectionHeader from '../../components/ui/SectionHeader';
-import HorizontalBookList from '../../components/ui/HorizontalBookList';
+import ForYouContent from '../../components/content/ForYouContent';
 import { useTheme } from '../../theme';
 
 const tabs = [
@@ -73,7 +70,6 @@ export default function Discover() {
       <Screen center>
         <View style={styles.errorContainer}>
           <Header showBackButton={false} />
-          <SectionHeader title="Erreur" />
           <View style={styles.errorContent}>
             <Text style={[styles.errorText, { color: theme.colors.textSecondary }]}>
               {error}
@@ -89,7 +85,6 @@ export default function Discover() {
       <Screen center>
         <View style={styles.emptyContainer}>
           <Header showBackButton={false} />
-          <SectionHeader title="Aucune donnée" />
           <View style={styles.emptyContent}>
             <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
               Aucune donnée disponible pour le moment
@@ -109,83 +104,28 @@ export default function Discover() {
         onTabChange={handleTabChange}
       />
 
-      {/* Bannière carrousel avec les 3 premiers livres populaires */}
-      {discoverData?.popular && discoverData.popular.length > 0 && (
-        <CarouselBanner
-          books={discoverData.popular}
+      {/* Contenu de la page "Pour vous" */}
+      {activeTab === 'pour-vous' && (
+        <ForYouContent
+          discoverData={discoverData}
           onBookPress={handleBookPress}
         />
       )}
 
-      {/* Section Populaire */}
-      {discoverData?.popular && discoverData.popular.length > 0 && (
-        <View style={styles.section}>
-          <SectionHeader title="Populaire" />
-          <HorizontalBookList
-            books={discoverData.popular}
-            variant="compact"
-            onBookPress={handleBookPress}
-          />
+      {/* TODO: Ajouter les composants pour "Par tag" et "Récent" */}
+      {activeTab === 'par-tag' && (
+        <View style={styles.placeholderContainer}>
+          <Text style={[styles.placeholderText, { color: theme.colors.textSecondary }]}>
+            Page "Par tag" - À implémenter
+          </Text>
         </View>
       )}
 
-      {/* Section Les mieux notés */}
-      {discoverData?.bestRated && discoverData.bestRated.length > 0 && (
-        <View style={styles.section}>
-          <SectionHeader title="Les mieux notés" />
-          <HorizontalBookList
-            books={discoverData.bestRated}
-            variant="compact"
-            onBookPress={handleBookPress}
-          />
-        </View>
-      )}
-
-      {/* Section Nouveautés */}
-      {discoverData?.newBooks && discoverData.newBooks.length > 0 && (
-        <View style={styles.section}>
-          <SectionHeader title="Nouveautés" />
-          <HorizontalBookList
-            books={discoverData.newBooks}
-            variant="compact"
-            onBookPress={handleBookPress}
-          />
-        </View>
-      )}
-
-      {/* Section Recommandations */}
-      {discoverData?.recommended && discoverData.recommended.length > 0 && (
-        <View style={styles.section}>
-          <SectionHeader title="Recommandations" />
-          <HorizontalBookList
-            books={discoverData.recommended}
-            variant="compact"
-            onBookPress={handleBookPress}
-          />
-        </View>
-      )}
-
-      {/* Section Complétés */}
-      {discoverData?.completed && discoverData.completed.length > 0 && (
-        <View style={styles.section}>
-          <SectionHeader title="Complétés" />
-          <HorizontalBookList
-            books={discoverData.completed}
-            variant="compact"
-            onBookPress={handleBookPress}
-          />
-        </View>
-      )}
-
-      {/* Section En cours utilisateur */}
-      {discoverData?.userInProgress && discoverData.userInProgress.length > 0 && (
-        <View style={styles.section}>
-          <SectionHeader title="En cours" />
-          <HorizontalBookList
-            books={discoverData.userInProgress}
-            variant="compact"
-            onBookPress={handleBookPress}
-          />
+      {activeTab === 'recent' && (
+        <View style={styles.placeholderContainer}>
+          <Text style={[styles.placeholderText, { color: theme.colors.textSecondary }]}>
+            Page "Récent" - À implémenter
+          </Text>
         </View>
       )}
     </Screen>
@@ -232,6 +172,17 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 22,
+  },
+  placeholderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  placeholderText: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });
 
