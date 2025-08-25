@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { BookDto } from '../../types/book';
 
@@ -31,8 +32,10 @@ export default function BookRow({ book, onPress }: BookRowProps) {
   };
 
   const getRating = () => {
-    // TODO: Ajouter la note depuis l'API quand elle sera disponible
-    return '9.98'; // Placeholder pour l'instant
+    if (book.note) {
+      return book.note.toFixed(2);
+    }
+    return 'N/A';
   };
 
   return (
@@ -56,9 +59,7 @@ export default function BookRow({ book, onPress }: BookRowProps) {
           </Text>
           <View style={styles.ratingContainer}>
             <Text style={styles.rating}>{getRating()}</Text>
-            <View style={styles.ratingIcon}>
-              {/* TODO: Ajouter l'icône de note */}
-            </View>
+            <Ionicons name="book" size={16} color="#FFE815" />
           </View>
         </View>
 
@@ -66,7 +67,7 @@ export default function BookRow({ book, onPress }: BookRowProps) {
         <Text style={styles.status}>{getStatusText(book.isCompleted || false)}</Text>
         
         <Text style={styles.description} numberOfLines={3}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          {book.synopsis || 'Aucune description disponible'}
         </Text>
       </View>
     </TouchableOpacity>
@@ -76,14 +77,9 @@ export default function BookRow({ book, onPress }: BookRowProps) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    marginHorizontal: 16,
-    marginBottom: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 6,
+    paddingVertical: 8,
+    marginHorizontal: 10,
   },
   cover: {
     width: COVER_WIDTH,
@@ -99,7 +95,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 2,
   },
   title: {
     fontSize: 18,
@@ -121,24 +117,19 @@ const styles = StyleSheet.create({
     color: '#FFE815',
     fontFamily: 'Orbitron',
   },
-  ratingIcon: {
-    width: 16,
-    height: 16,
-    backgroundColor: '#FFE815',
-    borderRadius: 2,
-  },
+
   volumes: {
     fontSize: 14,
     color: '#FFFFFF',
     opacity: 0.9,
-    marginBottom: 4,
+    marginBottom: 0,
     fontFamily: 'Rubik',
   },
   status: {
     fontSize: 14,
     color: '#FFFFFF',
     opacity: 0.9,
-    marginBottom: 8,
+    marginBottom: 2,
     fontFamily: 'Rubik',
   },
   description: {

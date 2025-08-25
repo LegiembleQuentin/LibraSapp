@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { ScrollView, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../theme';
 import { Tag } from '../../types/book';
@@ -9,7 +9,7 @@ interface TagFilterProps {
   onTagSelect: (tag: Tag) => void;
 }
 
-export default function TagFilter({ tags, selectedTags, onTagSelect }: TagFilterProps) {
+export default memo(({ tags, selectedTags, onTagSelect }: TagFilterProps) => {
   const { theme } = useTheme();
 
   return (
@@ -44,17 +44,17 @@ export default function TagFilter({ tags, selectedTags, onTagSelect }: TagFilter
       })}
     </ScrollView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingBottom: 20,
     gap: 16,
   },
   tag: {
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

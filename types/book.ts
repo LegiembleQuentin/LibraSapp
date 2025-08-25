@@ -6,6 +6,8 @@ export interface BookDto {
   userCurrentVolume?: number;
   isCompleted?: boolean;
   authors?: any[];
+  synopsis?: string;
+  note?: number;
 }
 
 export interface Tag {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../theme';
 import { BookDto, Tag } from '../../types/book';
@@ -20,21 +20,21 @@ export default function ByTagContent({ jwtToken, onBookPress }: ByTagContentProp
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Charger les tags au montage du composant
     fetchTags();
   }, []);
 
   useEffect(() => {
+    // Charger tous les livres au montage (aucun tag sélectionné)
+    fetchBooksByTags([]);
+  }, []);
+
+  useEffect(() => {
     // Charger les livres quand les tags sélectionnés changent
-    if (selectedTags.length > 0) {
-      fetchBooksByTags(selectedTags);
-    } else {
-      // Charger tous les livres si aucun tag n'est sélectionné
-      fetchBooksByTags([]);
-    }
+    // L'API gère le cas où aucun tag n'est sélectionné
+    fetchBooksByTags(selectedTags);
   }, [selectedTags]);
 
-  const fetchTags = async () => {
+  const fetchTags = useCallback(async () => {
     try {
       const tagsData = await apiClient.getTags(jwtToken) as Tag[];
       setTags(tagsData);
@@ -42,9 +42,9 @@ export default function ByTagContent({ jwtToken, onBookPress }: ByTagContentProp
       console.error('Erreur lors du chargement des tags:', err);
       setError('Impossible de charger les tags');
     }
-  };
+  }, [jwtToken]);
 
-  const fetchBooksByTags = async (selectedTags: Tag[]) => {
+  const fetchBooksByTags = useCallback(async (selectedTags: Tag[]) => {
     try {
       setLoading(true);
       setError(null);
@@ -60,30 +60,17 @@ export default function ByTagContent({ jwtToken, onBookPress }: ByTagContentProp
     } finally {
       setLoading(false);
     }
-  };
+  }, [jwtToken]);
 
-  const handleTagSelect = (tag: Tag) => {
+  const handleTagSelect = useCallback((tag: Tag) => {
     setSelectedTags(prev => {
       if (prev.some(t => t.id === tag.id)) {
-        // Retirer le tag s'il est déjà sélectionné
         return prev.filter(t => t.id !== tag.id);
       } else {
-        // Ajouter le tag
         return [...prev, tag];
       }
     });
-  };
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.colors.accent} />
-        <Text style={[styles.loadingText, { color: theme.colors.textPrimary }]}>
-          Chargement des livres...
-        </Text>
-      </View>
-    );
-  }
+  }, []);
 
   if (error) {
     return (
@@ -97,38 +84,47 @@ export default function ByTagContent({ jwtToken, onBookPress }: ByTagContentProp
 
   return (
     <View style={styles.container}>
-      {/* Filtre par tags */}
       <TagFilter
         tags={tags}
         selectedTags={selectedTags}
         onTagSelect={handleTagSelect}
       />
 
-      {/* Liste des livres */}
-      <ScrollView
-        style={styles.booksContainer}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.booksContent}
-      >
-        {books.length > 0 ? (
-          books.map((book) => (
-            <BookRow
-              key={book.id}
-              book={book}
-              onPress={onBookPress}
-            />
-          ))
-        ) : (
-          <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
-              {selectedTags.length > 0 
-                ? `Aucun livre trouvé pour les tags sélectionnés`
-                : 'Aucun livre disponible pour le moment'
-              }
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.accent} />
+          <Text style={[styles.loadingText, { color: theme.colors.textPrimary }]}>
+            Chargement des livres...
+          </Text>
+        </View>
+      )}
+
+      {books.length > 0 && !loading && (
+              <ScrollView
+              style={styles.booksContainer}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.booksContent}
+            >
+              {books.length > 0 ? (
+                books.map((book) => (
+                  <BookRow
+                    key={book.id}
+                    book={book}
+                    onPress={onBookPress}
+                  />
+                ))
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+                    {selectedTags.length > 0 
+                      ? `Aucun livre trouvé pour les tags sélectionnés`
+                      : 'Aucun livre disponible pour le moment'
+                    }
+                  </Text>
+                </View>
+              )}
+            </ScrollView>
+      )}
     </View>
   );
 }
