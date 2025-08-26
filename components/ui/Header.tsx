@@ -41,9 +41,11 @@ export default function Header({
         )}
         
         {title && (
-          <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
-            {title}
-          </Text>
+          <View style={styles.titleContainer}>
+            <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
+              {title}
+            </Text>
+          </View>
         )}
       </View>
       
@@ -65,22 +67,26 @@ const styles = StyleSheet.create({
   },
   backButton: {
     paddingHorizontal: 8,
-    paddingVertical: 8,
     width: 40,
     alignItems: 'center',
+    marginRight: 16,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    marginBottom: 16,
+    //marginBottom: 16,
     position: 'relative',
+  },
+  titleContainer: {
+    textAlign: 'center',
+    paddingVertical: 16,
+    
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     fontFamily: 'Orbitron',
-    position: 'absolute',
     left: 0,
     right: 0,
     textAlign: 'center',

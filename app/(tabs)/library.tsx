@@ -89,7 +89,7 @@ export default function Library() {
 
   return (
     <Screen>
-      <Header showBackButton={true} title="Ma bibliothèque" onBackPress={() => router.back()}/>
+      <Header showBackButton={false} title="Ma bibliothèque" onBackPress={() => router.back()}/>
       
       <ScrollView
         style={styles.booksContainer}

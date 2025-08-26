@@ -117,6 +117,12 @@ class ApiClient {
     });
   }
 
+  async searchBooks(query: string, token: string) {
+    return this.makeAuthenticatedRequest(`/books/search/${encodeURIComponent(query)}`, token, {
+      method: 'GET',
+    });
+  }
+
 }
 
 export const apiClient = new ApiClient();
