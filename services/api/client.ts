@@ -111,6 +111,12 @@ class ApiClient {
     });
   }
 
+  async getUserBooks(token: string) {
+    return this.makeAuthenticatedRequest('/book/by-user', token, {
+      method: 'GET',
+    });
+  }
+
 }
 
 export const apiClient = new ApiClient();

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import TabSelector from './TabSelector';
@@ -7,6 +7,7 @@ import TabSelector from './TabSelector';
 interface HeaderProps {
   onBackPress?: () => void;
   showBackButton?: boolean;
+  title?: string;
   tabs?: Array<{ id: string; label: string }>;
   activeTab?: string;
   onTabChange?: (tabId: string) => void;
@@ -15,6 +16,7 @@ interface HeaderProps {
 export default function Header({ 
   onBackPress, 
   showBackButton = false, 
+  title,
   tabs, 
   activeTab, 
   onTabChange 
@@ -23,19 +25,27 @@ export default function Header({
 
   return (
     <View style={styles.container}>
-      {showBackButton && (
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={onBackPress}
-          activeOpacity={0.7}
-        >
-          <Ionicons
-            name="chevron-back"
-            size={24}
-            color={theme.colors.textPrimary}
-          />
-        </TouchableOpacity>
-      )}
+      <View style={styles.headerRow}>
+        {showBackButton && (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={onBackPress}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={24}
+              color={theme.colors.textPrimary}
+            />
+          </TouchableOpacity>
+        )}
+        
+        {title && (
+          <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
+            {title}
+          </Text>
+        )}
+      </View>
       
       {tabs && activeTab && onTabChange && (
         <TabSelector
@@ -54,8 +64,25 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   backButton: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
     paddingVertical: 8,
+    width: 40,
+    alignItems: 'center',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
     marginBottom: 16,
+    position: 'relative',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    fontFamily: 'Orbitron',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    textAlign: 'center',
   },
 });

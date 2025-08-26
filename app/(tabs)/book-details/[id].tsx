@@ -70,12 +70,10 @@ export default function BookDetails() {
 
   return (
     <Screen>
-      <Header showBackButton onBackPress={handleBackPress} />
+      <Header showBackButton onBackPress={handleBackPress} title={book.names && book.names.length > 0 ? book.names[0] : 'Sans titre'}/>
       
       <View style={styles.container}>
-        <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
-          {book.names && book.names.length > 0 ? book.names[0] : 'Sans titre'}
-        </Text>
+        
       </View>
     </Screen>
   );
