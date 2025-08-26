@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
@@ -20,6 +20,12 @@ const COVER_HEIGHT = 120;
 export default function BookRow({ book, onPress, onLibraryChange }: BookRowProps) {
   const { theme } = useTheme();
   const { jwtToken } = useAuth();
+  const [isInLibrary, setIsInLibrary] = useState<boolean>(book.isInUserLibrary || false);
+
+  // Synchroniser l'état local avec les changements de props
+  useEffect(() => {
+    setIsInLibrary(book.isInUserLibrary || false);
+  }, [book.isInUserLibrary]);
 
   const getStatusText = (isCompleted: boolean) => {
     return isCompleted ? 'Complété' : 'En cours';
@@ -53,8 +59,11 @@ export default function BookRow({ book, onPress, onLibraryChange }: BookRowProps
       await markLibraryChanged(book.id);
       
       // Mettre à jour l'état local immédiatement pour une réponse UI instantanée
+      setIsInLibrary(prev => !prev);
+      
+      // Notifier le composant parent du changement
       if (onLibraryChange) {
-        onLibraryChange(book.id, !book.isInUserLibrary);
+        onLibraryChange(book.id, !isInLibrary);
       }
     } catch (error) {
       console.error('Erreur lors du switch de la bibliothèque:', error);
@@ -88,7 +97,7 @@ export default function BookRow({ book, onPress, onLibraryChange }: BookRowProps
               style={styles.bookIconContainer}
             >
               <Ionicons 
-                name={book.isInUserLibrary ? 'book' : 'book-outline'} 
+                name={isInLibrary ? 'book' : 'book-outline'} 
                 size={16} 
                 color="#FFE815" 
               />
