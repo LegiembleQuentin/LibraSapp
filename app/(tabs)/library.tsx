@@ -45,7 +45,7 @@ export default function Library() {
   const handleBookPress = (book: BookDto) => {
     router.push({
       pathname: '/(tabs)/book-details/[id]',
-      params: { id: book.id.toString() }
+      params: { id: book.id.toString(), from: 'library' }
     });
   };
 

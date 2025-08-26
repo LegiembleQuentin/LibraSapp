@@ -50,7 +50,7 @@ export default function Discover() {
   const handleBookPress = (book: any) => {
     router.push({
       pathname: '/(tabs)/book-details/[id]',
-      params: { id: book.id.toString() }
+      params: { id: book.id.toString(), from: 'discover' }
     });
   };
 

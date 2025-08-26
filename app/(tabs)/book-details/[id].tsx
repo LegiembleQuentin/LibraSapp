@@ -11,7 +11,7 @@ import Header from '../../../components/ui/Header';
 export default function BookDetails() {
   const { theme } = useTheme();
   const { jwtToken } = useAuth();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
   const [book, setBook] = useState<BookDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +39,25 @@ export default function BookDetails() {
   };
 
   const handleBackPress = () => {
-    router.back();
+    // Navigation explicite vers la page d'origine
+    if (from) {
+      switch (from) {
+        case 'discover':
+          router.replace('/(tabs)/discover');
+          break;
+        case 'library':
+          router.replace('/(tabs)/library');
+          break;
+        case 'search':
+          router.replace('/(tabs)/search');
+          break;
+        default:
+          router.replace('/(tabs)/discover');
+      }
+    } else {
+      // Fallback : retourner à la page discover
+      router.replace('/(tabs)/discover');
+    }
   };
 
   if (loading) {
