@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useTheme } from '../../../theme';
@@ -20,11 +21,42 @@ export default function BookDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (id && jwtToken) {
-      fetchBookDetails();
-    }
-  }, [id, jwtToken]);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+  
+      const run = async () => {
+        if (!id || !jwtToken) return;
+  
+        try {
+          setLoading(true);
+          setError(null);
+  
+          const bookData = await apiClient.getBookDetails(parseInt(id as string, 10), jwtToken) as BookDto;
+  
+          if (!isActive) return;
+          setBook(bookData);
+  
+          const inLib = Boolean(bookData.userStatus || bookData.userCurrentVolume);
+          setIsInLibrary(inLib);
+        } catch (err: any) {
+          if (!isActive) return;
+          console.error('Erreur lors du chargement des détails du livre:', err);
+          setError(err.message || 'Erreur lors du chargement des détails');
+          Alert.alert('Erreur', 'Impossible de charger les détails du livre');
+        } finally {
+          if (isActive) setLoading(false);
+        }
+      };
+  
+      run();
+  
+      return () => {
+        isActive = false;
+      };
+    }, [id, jwtToken])
+  );
+  
 
   const fetchBookDetails = async () => {
     try {
@@ -51,7 +83,7 @@ export default function BookDetails() {
       await apiClient.switchInUserLibrary(bookId, jwtToken);
       setIsInLibrary(prev => !prev);
     } catch (e) {
-      // silencieux (l'API switch déjà), on pourrait afficher un toast
+      
     }
   };
 

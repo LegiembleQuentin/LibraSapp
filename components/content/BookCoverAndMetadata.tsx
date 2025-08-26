@@ -70,12 +70,8 @@ export default function BookCoverAndMetadata({ book, isInLibrary, onToggleLibrar
     if (!jwtToken) return;
     
     try {
-      await apiClient.switchInUserLibrary(book.id, jwtToken);
-      
-      // Marquer le changement pour la synchronisation
       await markLibraryChanged(book.id);
       
-      // Notifier le composant parent du changement
       if (onToggleLibrary) {
         onToggleLibrary(book.id);
       }
