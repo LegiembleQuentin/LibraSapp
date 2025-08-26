@@ -52,7 +52,7 @@ export default function BookRow({ book, onPress, onLibraryChange }: BookRowProps
       // Marquer le changement pour la synchronisation
       await markLibraryChanged(book.id);
       
-      // Notifier le composant parent du changement
+      // Mettre à jour l'état local immédiatement pour une réponse UI instantanée
       if (onLibraryChange) {
         onLibraryChange(book.id, !book.isInUserLibrary);
       }

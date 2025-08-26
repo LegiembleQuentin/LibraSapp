@@ -5,6 +5,8 @@ import { useTheme } from '../../theme';
 import { BookDto } from '../../types/book';
 import { apiClient } from '../../services/api/client';
 import { useAuth } from '../../hooks/useAuth';
+import { markLibraryChanged, consumeLibraryChanges } from '../../utils/librarySync';
+import { useFocusEffect } from '@react-navigation/native';
 import Screen from '../../components/ui/Screen';
 import BookCard from '../../components/ui/BookCard';
 import BookRow from '../../components/ui/BookRow';
@@ -42,6 +44,34 @@ export default function Search() {
     }
   }, [debouncedQuery, isAuthenticated, jwtToken]);
 
+  // Vérifier les changements de bibliothèque à chaque focus
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const checkLibraryChanges = async () => {
+        if (!isAuthenticated || !jwtToken || books.length === 0) return;
+
+        try {
+          const changedBookIds = await consumeLibraryChanges();
+          
+          // Si des changements ont été détectés, recharger la recherche
+          if (changedBookIds.length > 0 && isActive) {
+            await performSearch(debouncedQuery);
+          }
+        } catch (error) {
+          console.error('Erreur lors de la vérification des changements:', error);
+        }
+      };
+
+      checkLibraryChanges();
+
+      return () => {
+        isActive = false;
+      };
+    }, [isAuthenticated, jwtToken, books.length, debouncedQuery])
+  );
+
   const performSearch = useCallback(async (query: string) => {
     try {
       setLoading(true);
@@ -64,15 +94,24 @@ export default function Search() {
     });
   };
 
-  const toggleLibrary = async (bookId: number) => {
+  const handleLibraryChange = async (bookId: number, isInLibrary: boolean) => {
     try {
-      await apiClient.switchInUserLibrary(bookId, jwtToken!);
+      // Marquer le changement pour la synchronisation
+      await markLibraryChanged(bookId);
+      
+      // Mettre à jour l'état local
       setLibraryIds(prev => {
         const next = new Set(prev);
-        if (next.has(bookId)) next.delete(bookId); else next.add(bookId);
+        if (isInLibrary) {
+          next.add(bookId);
+        } else {
+          next.delete(bookId);
+        }
         return next;
       });
-    } catch (e) {}
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de la bibliothèque:', error);
+    }
   };
 
   const toggleViewMode = () => {
@@ -193,15 +232,14 @@ export default function Search() {
             ) : (
               // Affichage en liste avec BookRow
               <View style={styles.list}>
-                {books.map((book) => (
-                  <BookRow
-                    key={book.id}
-                    book={book}
-                    onPress={handleBookPress}
-                    isInLibrary={libraryIds.has(book.id)}
-                    onToggleLibrary={toggleLibrary}
-                  />
-                ))}
+                                     {books.map((book) => (
+                       <BookRow
+                         key={book.id}
+                         book={book}
+                         onPress={handleBookPress}
+                         onLibraryChange={handleLibraryChange}
+                       />
+                     ))}
               </View>
             )}
           </ScrollView>
