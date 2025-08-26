@@ -40,7 +40,15 @@ class ApiClient {
         throw new Error(`API Error ${response.status}: ${errorData}`);
       }
 
-      return await response.json();
+      // Vérifier le Content-Type de la réponse
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return await response.json();
+      } else {
+        // Si ce n'est pas du JSON, retourner le texte
+        const textResponse = await response.text();
+        return textResponse as T;
+      }
     } catch (error) {
       throw error;
     }
@@ -74,6 +82,42 @@ class ApiClient {
         'Authorization': `Bearer ${token}`,
       },
     });
+  }
+
+  // Méthode pour les endpoints qui retournent du texte simple
+  private async makeAuthenticatedTextRequest(
+    endpoint: string,
+    token: string,
+    options: RequestInit = {}
+  ): Promise<string> {
+    const url = `${this.baseUrl}${endpoint}`;
+
+    const defaultHeaders: HeadersInit = {
+      'Content-Type': 'application/json',
+      'API-Key': this.apiKey,
+      'Authorization': `Bearer ${token}`,
+    };
+
+    const config: RequestInit = {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers,
+      },
+    };
+
+    try {
+      const response = await fetch(url, config);
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`API Error ${response.status}: ${errorData}`);
+      }
+
+      return await response.text();
+    } catch (error) {
+      throw error;
+    }
   }
 
   // Exemple d'endpoint protégé (pour plus tard)
@@ -120,6 +164,12 @@ class ApiClient {
   async searchBooks(query: string, token: string) {
     return this.makeAuthenticatedRequest(`/books/search/${encodeURIComponent(query)}`, token, {
       method: 'GET',
+    });
+  }
+
+  async switchInUserLibrary(bookId: number, token: string) {
+    return this.makeAuthenticatedRequest(`/book/${bookId}/switch-in-user-library`, token, {
+      method: 'POST',
     });
   }
 

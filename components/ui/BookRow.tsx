@@ -3,18 +3,23 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { BookDto } from '../../types/book';
+import { apiClient } from '../../services/api/client';
+import { useAuth } from '../../hooks/useAuth';
+import { markLibraryChanged } from '../../utils/librarySync';
 
 interface BookRowProps {
   book: BookDto;
   onPress?: (book: BookDto) => void;
+  onLibraryChange?: (bookId: number, isInLibrary: boolean) => void;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
 const COVER_WIDTH = 80;
 const COVER_HEIGHT = 120;
 
-export default function BookRow({ book, onPress }: BookRowProps) {
+export default function BookRow({ book, onPress, onLibraryChange }: BookRowProps) {
   const { theme } = useTheme();
+  const { jwtToken } = useAuth();
 
   const getStatusText = (isCompleted: boolean) => {
     return isCompleted ? 'Complété' : 'En cours';
@@ -38,6 +43,24 @@ export default function BookRow({ book, onPress }: BookRowProps) {
     return 'N/A';
   };
 
+  const handleLibraryToggle = async () => {
+    if (!jwtToken) return;
+    
+    try {
+      await apiClient.switchInUserLibrary(book.id, jwtToken);
+      
+      // Marquer le changement pour la synchronisation
+      await markLibraryChanged(book.id);
+      
+      // Notifier le composant parent du changement
+      if (onLibraryChange) {
+        onLibraryChange(book.id, !book.isInUserLibrary);
+      }
+    } catch (error) {
+      console.error('Erreur lors du switch de la bibliothèque:', error);
+    }
+  };
+
   return (
     <TouchableOpacity
       style={styles.container}
@@ -59,7 +82,17 @@ export default function BookRow({ book, onPress }: BookRowProps) {
           </Text>
           <View style={styles.ratingContainer}>
             <Text style={styles.rating}>{getRating()}</Text>
-            <Ionicons name="book" size={16} color="#FFE815" />
+            <TouchableOpacity 
+              onPress={handleLibraryToggle}
+              hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+              style={styles.bookIconContainer}
+            >
+              <Ionicons 
+                name={book.isInUserLibrary ? 'book' : 'book-outline'} 
+                size={16} 
+                color="#FFE815" 
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -116,6 +149,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFE815',
     fontFamily: 'Orbitron',
+  },
+  bookIconContainer: {
+    padding: 2,
   },
 
   volumes: {

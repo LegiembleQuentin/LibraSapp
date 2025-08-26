@@ -18,6 +18,7 @@ export default function Search() {
   const { jwtToken, isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [books, setBooks] = useState<BookDto[]>([]);
+  const [libraryIds, setLibraryIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -47,6 +48,7 @@ export default function Search() {
       setError(null);
       const data = await apiClient.searchBooks(query, jwtToken!) as BookDto[];
       setBooks(data);
+      // Optionnel: mettre à jour l'état d'appartenance via un autre endpoint si dispo
     } catch (err: any) {
       setError(err.message || 'Erreur lors de la recherche');
       setBooks([]);
@@ -60,6 +62,17 @@ export default function Search() {
       pathname: '/(tabs)/book-details/[id]',
       params: { id: book.id.toString(), from: 'search' }
     });
+  };
+
+  const toggleLibrary = async (bookId: number) => {
+    try {
+      await apiClient.switchInUserLibrary(bookId, jwtToken!);
+      setLibraryIds(prev => {
+        const next = new Set(prev);
+        if (next.has(bookId)) next.delete(bookId); else next.add(bookId);
+        return next;
+      });
+    } catch (e) {}
   };
 
   const toggleViewMode = () => {
@@ -185,6 +198,8 @@ export default function Search() {
                     key={book.id}
                     book={book}
                     onPress={handleBookPress}
+                    isInLibrary={libraryIds.has(book.id)}
+                    onToggleLibrary={toggleLibrary}
                   />
                 ))}
               </View>

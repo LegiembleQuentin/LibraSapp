@@ -1,8 +1,11 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { BookDto } from '../../types/book';
+import { apiClient } from '../../services/api/client';
+import { useAuth } from '../../hooks/useAuth';
+import { markLibraryChanged } from '../../utils/librarySync';
 
 const { width: screenWidth } = Dimensions.get('window');
 const COVER_WIDTH = (screenWidth - 48) * 0.5;
@@ -10,10 +13,13 @@ const COVER_HEIGHT = COVER_WIDTH * 1.412;
 
 interface BookCoverAndMetadataProps {
   book: BookDto;
+  isInLibrary?: boolean;
+  onToggleLibrary?: (bookId: number) => void;
 }
 
-export default function BookCoverAndMetadata({ book }: BookCoverAndMetadataProps) {
+export default function BookCoverAndMetadata({ book, isInLibrary, onToggleLibrary }: BookCoverAndMetadataProps) {
   const { theme } = useTheme();
+  const { jwtToken } = useAuth();
 
   const getTitle = () => {
     return book.names && book.names.length > 0 ? book.names[0] : 'Sans titre';
@@ -60,6 +66,24 @@ export default function BookCoverAndMetadata({ book }: BookCoverAndMetadataProps
     return book.isCompleted ? 'Complété' : 'Non défini';
   };
 
+  const handleLibraryToggle = async () => {
+    if (!jwtToken) return;
+    
+    try {
+      await apiClient.switchInUserLibrary(book.id, jwtToken);
+      
+      // Marquer le changement pour la synchronisation
+      await markLibraryChanged(book.id);
+      
+      // Notifier le composant parent du changement
+      if (onToggleLibrary) {
+        onToggleLibrary(book.id);
+      }
+    } catch (error) {
+      console.error('Erreur lors du switch de la bibliothèque:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Couverture du livre */}
@@ -76,7 +100,17 @@ export default function BookCoverAndMetadata({ book }: BookCoverAndMetadataProps
         {/* Ligne: Label + icône */}
         <View style={styles.topRow}>
           <Text style={[styles.topLabel, { color: theme.colors.white }]}>Vous correspond à :</Text>
-          <Ionicons name="book" size={28} color={theme.colors.accent} />
+          <TouchableOpacity 
+            onPress={handleLibraryToggle}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            style={styles.bookIconContainer}
+          >
+            <Ionicons 
+              name={isInLibrary ? 'book' : 'book-outline'} 
+              size={28} 
+              color={theme.colors.accent} 
+            />
+          </TouchableOpacity>
         </View>
         {/* Valeur en dessous en grand */}
         <Text style={[styles.matchValue, { color: theme.colors.accent }]}>
@@ -205,5 +239,8 @@ const styles = StyleSheet.create({
   volumes: {
     fontSize: 12,
     fontFamily: 'Rubik',
+  },
+  bookIconContainer: {
+    padding: 2,
   },
 });

@@ -16,6 +16,7 @@ export default function BookDetails() {
   const { jwtToken } = useAuth();
   const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
   const [book, setBook] = useState<BookDto | null>(null);
+  const [isInLibrary, setIsInLibrary] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,12 +33,25 @@ export default function BookDetails() {
 
       const bookData = await apiClient.getBookDetails(parseInt(id), jwtToken!) as BookDto;
       setBook(bookData);
+      // Déduire l'appartenance à la bibliothèque si userStatus présent, sinon via userCurrentVolume / heuristique
+      const inLib = !!(bookData.userStatus || bookData.userCurrentVolume || 0);
+      setIsInLibrary(!!inLib);
     } catch (err: any) {
       console.error('Erreur lors du chargement des détails du livre:', err);
       setError(err.message || 'Erreur lors du chargement des détails');
       Alert.alert('Erreur', 'Impossible de charger les détails du livre');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleLibrary = async (bookId: number) => {
+    if (!jwtToken) return;
+    try {
+      await apiClient.switchInUserLibrary(bookId, jwtToken);
+      setIsInLibrary(prev => !prev);
+    } catch (e) {
+      // silencieux (l'API switch déjà), on pourrait afficher un toast
     }
   };
 
@@ -96,7 +110,7 @@ export default function BookDetails() {
       />
       
       <View style={styles.container}>
-        <BookCoverAndMetadata book={book} />
+        <BookCoverAndMetadata book={book} isInLibrary={isInLibrary} onToggleLibrary={handleToggleLibrary} />
         <BookTags book={book} />
         <BookSynopsis book={book} />
       </View>

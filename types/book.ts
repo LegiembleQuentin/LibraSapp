@@ -20,6 +20,7 @@ export interface BookDto {
   modifiedAt?: string;
   relatedBooks?: Set<BookDto>;
   sameAuthorBooks?: Set<BookDto>;
+  isInUserLibrary?: boolean;
 }
 
 export interface Tag {
