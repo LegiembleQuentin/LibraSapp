@@ -8,6 +8,18 @@ export interface BookDto {
   authors?: any[];
   synopsis?: string;
   note?: number;
+  
+  // Nouveaux champs de l'API
+  dateStart?: string;
+  dateEnd?: string;
+  tags?: Set<any>;
+  userStatus?: string;
+  userRating?: number;
+  userMatch?: number;
+  createdAt?: string;
+  modifiedAt?: string;
+  relatedBooks?: Set<BookDto>;
+  sameAuthorBooks?: Set<BookDto>;
 }
 
 export interface Tag {

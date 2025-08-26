@@ -7,6 +7,9 @@ import { useAuth } from '../../../hooks/useAuth';
 import { apiClient } from '../../../services/api/client';
 import Screen from '../../../components/ui/Screen';
 import Header from '../../../components/ui/Header';
+import BookCoverAndMetadata from '../../../components/content/BookCoverAndMetadata';
+import BookTags from '../../../components/content/BookTags';
+import BookSynopsis from '../../../components/content/BookSynopsis';
 
 export default function BookDetails() {
   const { theme } = useTheme();
@@ -39,7 +42,6 @@ export default function BookDetails() {
   };
 
   const handleBackPress = () => {
-    // Navigation explicite vers la page d'origine
     if (from) {
       switch (from) {
         case 'discover':
@@ -55,7 +57,6 @@ export default function BookDetails() {
           router.replace('/(tabs)/discover');
       }
     } else {
-      // Fallback : retourner à la page discover
       router.replace('/(tabs)/discover');
     }
   };
@@ -76,7 +77,7 @@ export default function BookDetails() {
   if (error || !book) {
     return (
       <Screen>
-        <Header showBackButton onBackPress={handleBackPress} />
+        <Header showBackButton title="Erreur" onBackPress={handleBackPress} />
         <View style={styles.errorContainer}>
           <Text style={[styles.errorText, { color: theme.colors.textSecondary }]}>
             {error || 'Livre non trouvé'}
@@ -88,10 +89,16 @@ export default function BookDetails() {
 
   return (
     <Screen>
-      <Header showBackButton onBackPress={handleBackPress} title={book.names && book.names.length > 0 ? book.names[0] : 'Sans titre'}/>
+      <Header 
+        showBackButton 
+        onBackPress={handleBackPress}
+        title={book.names && book.names.length > 0 ? book.names[0] : 'Sans titre'}
+      />
       
       <View style={styles.container}>
-        
+        <BookCoverAndMetadata book={book} />
+        <BookTags book={book} />
+        <BookSynopsis book={book} />
       </View>
     </Screen>
   );
@@ -100,7 +107,6 @@ export default function BookDetails() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 16,
     paddingTop: 20,
   },
   loadingContainer: {
