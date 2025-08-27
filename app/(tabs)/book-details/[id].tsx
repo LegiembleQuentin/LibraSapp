@@ -11,6 +11,8 @@ import Header from '../../../components/ui/Header';
 import BookCoverAndMetadata from '../../../components/content/BookCoverAndMetadata';
 import BookTags from '../../../components/content/BookTags';
 import BookSynopsis from '../../../components/content/BookSynopsis';
+import HorizontalBookList from '../../../components/ui/HorizontalBookList';
+import SectionHeader from '../../../components/ui/SectionHeader';
 
 export default function BookDetails() {
   const { theme } = useTheme();
@@ -64,7 +66,6 @@ export default function BookDetails() {
       setError(null);
 
       const bookData = await apiClient.getBookDetails(parseInt(id), jwtToken!) as BookDto;
-      setBook(bookData);
       // Déduire l'appartenance à la bibliothèque si userStatus présent, sinon via userCurrentVolume / heuristique
       const inLib = !!(bookData.userStatus || bookData.userCurrentVolume || 0);
       setIsInLibrary(!!inLib);
@@ -145,6 +146,19 @@ export default function BookDetails() {
         <BookCoverAndMetadata book={book} isInLibrary={isInLibrary} onToggleLibrary={handleToggleLibrary} />
         <BookTags book={book} />
         <BookSynopsis book={book} />
+        
+        {book.sameAuthorBooks&& (
+          <View style={styles.section}>
+            <SectionHeader title="Du même auteur" />
+            <HorizontalBookList 
+              books={Array.from(book.sameAuthorBooks)} 
+              onBookPress={(book) => router.push({
+                pathname: '/(tabs)/book-details/[id]',
+                params: { id: book.id.toString(), from: 'book-details' }
+              })}
+            />
+          </View>
+        )}
       </View>
     </Screen>
   );
@@ -154,6 +168,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 20,
+  },
+  section: {
+    marginTop: 10,
+    marginBottom: 40,
   },
   loadingContainer: {
     flex: 1,

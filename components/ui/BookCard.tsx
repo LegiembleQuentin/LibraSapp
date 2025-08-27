@@ -19,7 +19,6 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
   };
 
   const getStatusText = (isCompleted: boolean) => {
-    console.log(book);
     return isCompleted ? 'Complété' : 'En cours';
   };
 
@@ -41,7 +40,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
   if (variant === 'featured') {
     return (
       <TouchableOpacity
-        style={[styles.featuredCard, { backgroundColor: theme.colors.card }]}
+        style={[styles.featuredCard]}
         onPress={handlePress}
         activeOpacity={0.8}
       >
@@ -96,7 +95,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
 
   return (
     <TouchableOpacity
-      style={[styles.defaultCard, { backgroundColor: theme.colors.card }]}
+      style={[styles.defaultCard]}
       onPress={handlePress}
       activeOpacity={0.8}
     >
