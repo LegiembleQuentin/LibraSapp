@@ -63,7 +63,7 @@ export default function BookCoverAndMetadata({ book, isInLibrary, onToggleLibrar
           return 'Non défini';
       }
     }
-    return book.isCompleted ? 'Complété' : 'Non défini';
+    return '-';
   };
 
   const handleLibraryToggle = async () => {
@@ -154,11 +154,11 @@ export default function BookCoverAndMetadata({ book, isInLibrary, onToggleLibrar
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    paddingHorizontal: 6,
+    paddingHorizontal: 10,
     marginBottom: 24,
   },
   coverContainer: {
-    marginRight: 6,
+    marginRight: 8,
   },
   cover: {
     width: COVER_WIDTH,

@@ -26,7 +26,7 @@ export default function BookTags({ book }: BookTagsProps) {
       >
         {tags.map((tag, index) => (
           <View key={index} style={styles.tag}>
-            <Text style={[styles.tagText, { color: theme.colors.white }]}>
+            <Text style={[styles.tagText, { color: theme.colors.black }]}>
               {tag}
             </Text>
           </View>
@@ -42,15 +42,14 @@ const styles = StyleSheet.create({
   },
   tagsContainer: {
     paddingHorizontal: 16,
+    paddingVertical: 6,
     gap: 12,
   },
   tag: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    backgroundColor: 'rgb(173, 173, 173)',
+    paddingHorizontal: 8,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    boxShadow: '0 1px 7px 0 rgba(255, 255, 255, 0.83)',
   },
   tagText: {
     fontSize: 14,

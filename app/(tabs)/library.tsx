@@ -45,7 +45,6 @@ export default function Library() {
           }
         } catch (error) {
           console.error('Erreur lors de la vérification des changements:', error);
-          // En cas d'erreur, charger la bibliothèque par sécurité
           if (isActive && books.length === 0) {
             await fetchUserLibrary();
           }

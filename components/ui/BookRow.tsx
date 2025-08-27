@@ -106,7 +106,7 @@ export default function BookRow({ book, onPress, onLibraryChange }: BookRowProps
         </View>
 
         <Text style={styles.volumes}>{getVolumeText()}</Text>
-        <Text style={styles.status}>{getStatusText(book.isCompleted || false)}</Text>
+        <Text style={styles.status}>{getStatusText(book.completed || false)}</Text>
         
         <Text style={styles.description} numberOfLines={3}>
           {book.synopsis || 'Aucune description disponible'}

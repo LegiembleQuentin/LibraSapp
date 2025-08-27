@@ -19,6 +19,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
   };
 
   const getStatusText = (isCompleted: boolean) => {
+    console.log(book);
     return isCompleted ? 'Complété' : 'En cours';
   };
 
@@ -58,7 +59,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
               {getVolumeText()}
             </Text>
             <View style={[styles.statusBadge, { backgroundColor: getStatusColor() }]}>
-              <Text style={styles.statusText}>{getStatusText(book.isCompleted || false)}</Text>
+              <Text style={styles.statusText}>{getStatusText(book.completed || false)}</Text>
             </View>
           </View>
         </View>
@@ -86,7 +87,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
             {getVolumeText()}
           </Text>
           <Text style={[styles.compactStatus, { color: getStatusColor() }]}>
-            {getStatusText(book.isCompleted || false)}
+            {getStatusText(book.completed || false)}
           </Text>
         </View>
       </TouchableOpacity>
@@ -112,7 +113,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
           {getVolumeText()}
         </Text>
         <Text style={[styles.compactStatus, { color: getStatusColor() }]}>
-          {getStatusText(book.isCompleted || false)}
+          {getStatusText(book.completed || false)}
         </Text>
       </View>
     </TouchableOpacity>

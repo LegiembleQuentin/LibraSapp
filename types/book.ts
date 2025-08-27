@@ -4,12 +4,11 @@ export interface BookDto {
   imgUrl: string;
   nbVolume: number;
   userCurrentVolume?: number;
-  isCompleted?: boolean;
+  completed?: boolean;
   authors?: any[];
   synopsis?: string;
   note?: number;
   
-  // Nouveaux champs de l'API
   dateStart?: string;
   dateEnd?: string;
   tags?: Set<any>;
