@@ -4,10 +4,22 @@ export interface BookDto {
   imgUrl: string;
   nbVolume: number;
   userCurrentVolume?: number;
-  isCompleted?: boolean;
+  completed?: boolean;
   authors?: any[];
   synopsis?: string;
   note?: number;
+  
+  dateStart?: string;
+  dateEnd?: string;
+  tags?: Set<any>;
+  userStatus?: string;
+  userRating?: number;
+  userMatch?: number;
+  createdAt?: string;
+  modifiedAt?: string;
+  relatedBooks?: Set<BookDto>;
+  sameAuthorBooks?: Set<BookDto>;
+  isInUserLibrary?: boolean;
 }
 
 export interface Tag {

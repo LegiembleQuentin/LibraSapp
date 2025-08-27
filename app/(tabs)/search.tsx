@@ -5,6 +5,8 @@ import { useTheme } from '../../theme';
 import { BookDto } from '../../types/book';
 import { apiClient } from '../../services/api/client';
 import { useAuth } from '../../hooks/useAuth';
+import { markLibraryChanged, consumeLibraryChanges } from '../../utils/librarySync';
+import { useFocusEffect } from '@react-navigation/native';
 import Screen from '../../components/ui/Screen';
 import BookCard from '../../components/ui/BookCard';
 import BookRow from '../../components/ui/BookRow';
@@ -18,6 +20,7 @@ export default function Search() {
   const { jwtToken, isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [books, setBooks] = useState<BookDto[]>([]);
+  const [libraryIds, setLibraryIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -41,6 +44,32 @@ export default function Search() {
     }
   }, [debouncedQuery, isAuthenticated, jwtToken]);
 
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const checkLibraryChanges = async () => {
+        if (!isAuthenticated || !jwtToken || books.length === 0) return;
+
+        try {
+          const changedBookIds = await consumeLibraryChanges();
+          
+          if (changedBookIds.length > 0 && isActive) {
+            await performSearch(debouncedQuery);
+          }
+        } catch (error) {
+          console.error('Erreur lors de la vérification des changements:', error);
+        }
+      };
+
+      checkLibraryChanges();
+
+      return () => {
+        isActive = false;
+      };
+    }, [isAuthenticated, jwtToken, books.length, debouncedQuery])
+  );
+
   const performSearch = useCallback(async (query: string) => {
     try {
       setLoading(true);
@@ -62,6 +91,24 @@ export default function Search() {
     });
   };
 
+  const handleLibraryChange = async (bookId: number, isInLibrary: boolean) => {
+    try {
+      await markLibraryChanged(bookId);
+      
+      setLibraryIds(prev => {
+        const next = new Set(prev);
+        if (isInLibrary) {
+          next.add(bookId);
+        } else {
+          next.delete(bookId);
+        }
+        return next;
+      });
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de la bibliothèque:', error);
+    }
+  };
+
   const toggleViewMode = () => {
     setViewMode(prev => prev === 'grid' ? 'list' : 'grid');
   };
@@ -80,7 +127,6 @@ export default function Search() {
 
   return (
     <Screen>
-      {/* Header avec input de recherche et boutons */}
       <View style={styles.header}>
         <View style={styles.searchContainer}>
           <TextInput
@@ -96,7 +142,6 @@ export default function Search() {
             autoCorrect={false}
           />
           
-          {/* Boutons de switch d'affichage */}
           <View style={styles.viewToggleContainer}>
             <TouchableOpacity
               style={[
@@ -131,7 +176,6 @@ export default function Search() {
         </View>
       </View>
 
-      {/* Contenu de recherche */}
       <View style={styles.content}>
         {loading && (
           <View style={styles.loadingContainer}>
@@ -165,7 +209,6 @@ export default function Search() {
             contentContainerStyle={styles.booksContent}
           >
             {viewMode === 'grid' ? (
-              // Affichage en grille avec BookCard
               <View style={styles.grid}>
                 {books.map((book) => (
                   <View key={book.id} style={styles.cardContainer}>
@@ -178,15 +221,15 @@ export default function Search() {
                 ))}
               </View>
             ) : (
-              // Affichage en liste avec BookRow
               <View style={styles.list}>
-                {books.map((book) => (
-                  <BookRow
-                    key={book.id}
-                    book={book}
-                    onPress={handleBookPress}
-                  />
-                ))}
+                                     {books.map((book) => (
+                       <BookRow
+                         key={book.id}
+                         book={book}
+                         onPress={handleBookPress}
+                         onLibraryChange={handleLibraryChange}
+                       />
+                     ))}
               </View>
             )}
           </ScrollView>
@@ -240,7 +283,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   viewToggleButtonActive: {
-    // Pas de style spécial pour l'état actif
   },
   content: {
     flex: 1,

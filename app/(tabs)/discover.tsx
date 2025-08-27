@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../services/api/client';
+import { consumeLibraryChanges } from '../../utils/librarySync';
 import Screen from '../../components/ui/Screen';
 import Header from '../../components/ui/Header';
 import ForYouContent from '../../components/content/ForYouContent';
@@ -24,11 +26,39 @@ export default function Discover() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isAuthenticated && jwtToken) {
-      fetchDiscoverData();
-    }
-  }, [isAuthenticated, jwtToken]);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const run = async () => {
+        if (!isAuthenticated || !jwtToken) return;
+
+        try {
+          // Vérifier s'il y a eu des changements dans la bibliothèque
+          const changedBookIds = await consumeLibraryChanges();
+          
+          // Si des changements ont été détectés ou pas de données, recharger
+          if (changedBookIds.length > 0 || !discoverData) {
+            if (isActive) {
+              await fetchDiscoverData();
+            }
+          }
+        } catch (error) {
+          console.error('Erreur lors de la vérification des changements:', error);
+          // En cas d'erreur, charger les données par sécurité
+          if (isActive && !discoverData) {
+            await fetchDiscoverData();
+          }
+        }
+      };
+
+      run();
+
+      return () => {
+        isActive = false;
+      };
+    }, [isAuthenticated, jwtToken, discoverData])
+  );
 
   const fetchDiscoverData = async () => {
     try {
@@ -110,7 +140,6 @@ export default function Discover() {
         onTabChange={handleTabChange}
       />
 
-      {/* Contenu de la page "Pour vous" */}
       {activeTab === 'pour-vous' && (
         <ForYouContent
           discoverData={discoverData}
@@ -118,7 +147,6 @@ export default function Discover() {
         />
       )}
 
-      {/* TODO: Ajouter les composants pour "Par tag" et "Récent" */}
       {activeTab === 'par-tag' && (
         <ByTagContent
           jwtToken={jwtToken!}

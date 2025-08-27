@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../theme';
 import { BookDto, Tag } from '../../types/book';
 import TagFilter from '../ui/TagFilter';
 import BookRow from '../ui/BookRow';
 import { apiClient } from '../../services/api/client';
+import { consumeLibraryChanges } from '../../utils/librarySync';
 
 interface ByTagContentProps {
   jwtToken: string;
@@ -33,6 +35,34 @@ export default function ByTagContent({ jwtToken, onBookPress }: ByTagContentProp
     // L'API gère le cas où aucun tag n'est sélectionné
     fetchBooksByTags(selectedTags);
   }, [selectedTags]);
+
+  // Vérifier les changements de bibliothèque à chaque focus
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const checkLibraryChanges = async () => {
+        if (books.length === 0) return;
+
+        try {
+          const changedBookIds = await consumeLibraryChanges();
+          
+          // Si des changements ont été détectés, recharger les livres
+          if (changedBookIds.length > 0 && isActive) {
+            await fetchBooksByTags(selectedTags);
+          }
+        } catch (error) {
+          console.error('Erreur lors de la vérification des changements:', error);
+        }
+      };
+
+      checkLibraryChanges();
+
+      return () => {
+        isActive = false;
+      };
+    }, [books.length, selectedTags])
+  );
 
   const fetchTags = useCallback(async () => {
     try {
@@ -71,6 +101,10 @@ export default function ByTagContent({ jwtToken, onBookPress }: ByTagContentProp
       }
     });
   }, []);
+
+  const handleLibraryChange = async (bookId: number, isInLibrary: boolean) => {
+    // TODO: a supprimer
+  };
 
   if (error) {
     return (
@@ -111,6 +145,7 @@ export default function ByTagContent({ jwtToken, onBookPress }: ByTagContentProp
                     key={book.id}
                     book={book}
                     onPress={onBookPress}
+                    onLibraryChange={handleLibraryChange}
                   />
                 ))
               ) : (

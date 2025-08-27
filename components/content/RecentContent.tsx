@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../theme';
 import { BookDto } from '../../types/book';
 import BookRow from '../ui/BookRow';
 import { apiClient } from '../../services/api/client';
+import { consumeLibraryChanges } from '../../utils/librarySync';
 
 interface RecentContentProps {
   jwtToken: string;
@@ -16,10 +18,37 @@ export default function RecentContent({ jwtToken, onBookPress }: RecentContentPr
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Charger les livres récents au montage du composant
-    fetchRecentBooks();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const run = async () => {
+        try {
+          // Vérifier s'il y a eu des changements dans la bibliothèque
+          const changedBookIds = await consumeLibraryChanges();
+          
+          // Si des changements ont été détectés ou pas de livres, recharger
+          if (changedBookIds.length > 0 || books.length === 0) {
+            if (isActive) {
+              await fetchRecentBooks();
+            }
+          }
+        } catch (error) {
+          console.error('Erreur lors de la vérification des changements:', error);
+          // En cas d'erreur, charger les livres par sécurité
+          if (isActive && books.length === 0) {
+            await fetchRecentBooks();
+          }
+        }
+      };
+
+      run();
+
+      return () => {
+        isActive = false;
+      };
+    }, [books.length])
+  );
 
   const fetchRecentBooks = useCallback(async () => {
     try {
@@ -36,6 +65,10 @@ export default function RecentContent({ jwtToken, onBookPress }: RecentContentPr
       setLoading(false);
     }
   }, [jwtToken]);
+
+  const handleLibraryChange = async (bookId: number, isInLibrary: boolean) => {
+    // TODO: a supprimer
+  };
 
   if (loading) {
     return (
@@ -71,6 +104,7 @@ export default function RecentContent({ jwtToken, onBookPress }: RecentContentPr
               key={book.id}
               book={book}
               onPress={onBookPress}
+              onLibraryChange={handleLibraryChange}
             />
           ))
         ) : (

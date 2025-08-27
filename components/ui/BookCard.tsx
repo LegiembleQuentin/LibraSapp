@@ -40,7 +40,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
   if (variant === 'featured') {
     return (
       <TouchableOpacity
-        style={[styles.featuredCard, { backgroundColor: theme.colors.card }]}
+        style={[styles.featuredCard]}
         onPress={handlePress}
         activeOpacity={0.8}
       >
@@ -58,7 +58,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
               {getVolumeText()}
             </Text>
             <View style={[styles.statusBadge, { backgroundColor: getStatusColor() }]}>
-              <Text style={styles.statusText}>{getStatusText(book.isCompleted || false)}</Text>
+              <Text style={styles.statusText}>{getStatusText(book.completed || false)}</Text>
             </View>
           </View>
         </View>
@@ -86,7 +86,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
             {getVolumeText()}
           </Text>
           <Text style={[styles.compactStatus, { color: getStatusColor() }]}>
-            {getStatusText(book.isCompleted || false)}
+            {getStatusText(book.completed || false)}
           </Text>
         </View>
       </TouchableOpacity>
@@ -95,7 +95,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
 
   return (
     <TouchableOpacity
-      style={[styles.defaultCard, { backgroundColor: theme.colors.card }]}
+      style={[styles.defaultCard]}
       onPress={handlePress}
       activeOpacity={0.8}
     >
@@ -112,7 +112,7 @@ export default function BookCard({ book, variant = 'default', onPress }: BookCar
           {getVolumeText()}
         </Text>
         <Text style={[styles.compactStatus, { color: getStatusColor() }]}>
-          {getStatusText(book.isCompleted || false)}
+          {getStatusText(book.completed || false)}
         </Text>
       </View>
     </TouchableOpacity>

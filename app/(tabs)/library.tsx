@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Dimensions } from 'react-native';
 import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../theme';
 import { BookDto } from '../../types/book';
 import { apiClient } from '../../services/api/client';
+import { consumeLibraryChanges } from '../../utils/librarySync';
 import Screen from '../../components/ui/Screen';
 import Header from '../../components/ui/Header';
 import BookCard from '../../components/ui/BookCard';
@@ -19,12 +21,43 @@ export default function Library() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Charger la bibliothèque de l'utilisateur au montage du composant
-    if (isAuthenticated && jwtToken) {
-      fetchUserLibrary();
-    }
-  }, [isAuthenticated, jwtToken]);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const run = async () => {
+        if (!isAuthenticated || !jwtToken) return;
+
+        try {
+          // Vérifier s'il y a eu des changements dans la bibliothèque
+          const changedBookIds = await consumeLibraryChanges();
+          
+          // Si des changements ont été détectés, recharger la bibliothèque
+          if (changedBookIds.length > 0) {
+            if (isActive) {
+              await fetchUserLibrary();
+            }
+          } else if (books.length === 0) {
+            // Si pas de changements mais pas de livres, charger la bibliothèque
+            if (isActive) {
+              await fetchUserLibrary();
+            }
+          }
+        } catch (error) {
+          console.error('Erreur lors de la vérification des changements:', error);
+          if (isActive && books.length === 0) {
+            await fetchUserLibrary();
+          }
+        }
+      };
+
+      run();
+
+      return () => {
+        isActive = false;
+      };
+    }, [isAuthenticated, jwtToken, books.length])
+  );
 
   const fetchUserLibrary = useCallback(async () => {
     try {

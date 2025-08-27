@@ -1,20 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { BookDto } from '../../types/book';
+import { apiClient } from '../../services/api/client';
+import { useAuth } from '../../hooks/useAuth';
+import { markLibraryChanged } from '../../utils/librarySync';
 
 interface BookRowProps {
   book: BookDto;
   onPress?: (book: BookDto) => void;
+  onLibraryChange?: (bookId: number, isInLibrary: boolean) => void;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
 const COVER_WIDTH = 80;
 const COVER_HEIGHT = 120;
 
-export default function BookRow({ book, onPress }: BookRowProps) {
+export default function BookRow({ book, onPress, onLibraryChange }: BookRowProps) {
   const { theme } = useTheme();
+  const { jwtToken } = useAuth();
+  const [isInLibrary, setIsInLibrary] = useState<boolean>(book.isInUserLibrary || false);
+
+  useEffect(() => {
+    setIsInLibrary(book.isInUserLibrary || false);
+  }, [book.isInUserLibrary]);
 
   const getStatusText = (isCompleted: boolean) => {
     return isCompleted ? 'Complété' : 'En cours';
@@ -38,20 +48,36 @@ export default function BookRow({ book, onPress }: BookRowProps) {
     return 'N/A';
   };
 
+  const handleLibraryToggle = async () => {
+    if (!jwtToken) return;
+    
+    try {
+      await apiClient.switchInUserLibrary(book.id, jwtToken);
+      
+      await markLibraryChanged(book.id);
+      
+      setIsInLibrary(prev => !prev);
+      
+      if (onLibraryChange) {
+        onLibraryChange(book.id, !isInLibrary);
+      }
+    } catch (error) {
+      console.error('Erreur lors du switch de la bibliothèque:', error);
+    }
+  };
+
   return (
     <TouchableOpacity
       style={styles.container}
       onPress={() => onPress?.(book)}
       activeOpacity={0.8}
     >
-      {/* Couverture du livre */}
       <Image
         source={{ uri: book.imgUrl }}
         style={styles.cover}
         resizeMode="cover"
       />
 
-      {/* Informations du livre */}
       <View style={styles.info}>
         <View style={styles.headerRow}>
           <Text style={styles.title} numberOfLines={2}>
@@ -59,12 +85,22 @@ export default function BookRow({ book, onPress }: BookRowProps) {
           </Text>
           <View style={styles.ratingContainer}>
             <Text style={styles.rating}>{getRating()}</Text>
-            <Ionicons name="book" size={16} color="#FFE815" />
+            <TouchableOpacity 
+              onPress={handleLibraryToggle}
+              hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+              style={styles.bookIconContainer}
+            >
+              <Ionicons 
+                name={isInLibrary ? 'book' : 'book-outline'} 
+                size={16} 
+                color="#FFE815" 
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
         <Text style={styles.volumes}>{getVolumeText()}</Text>
-        <Text style={styles.status}>{getStatusText(book.isCompleted || false)}</Text>
+        <Text style={styles.status}>{getStatusText(book.completed || false)}</Text>
         
         <Text style={styles.description} numberOfLines={3}>
           {book.synopsis || 'Aucune description disponible'}
@@ -116,6 +152,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFE815',
     fontFamily: 'Orbitron',
+  },
+  bookIconContainer: {
+    padding: 2,
   },
 
   volumes: {
