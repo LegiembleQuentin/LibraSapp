@@ -27,10 +27,8 @@ export default function Index() {
   }
 
   if (user) {
-    // L'utilisateur est connecté, aller aux onglets
     return <Redirect href={"/(tabs)/discover" as any} />;
   } else {
-    // L'utilisateur n'est pas connecté, rediriger vers la connexion
     return <Redirect href={"/(auth)/Login" as any} />;
   }
 }

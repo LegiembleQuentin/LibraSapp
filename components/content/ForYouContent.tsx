@@ -13,7 +13,6 @@ interface ForYouContentProps {
 export default function ForYouContent({ discoverData, onBookPress }: ForYouContentProps) {
   return (
     <View style={styles.container}>
-      {/* Bannière carrousel avec les 3 premiers livres populaires */}
       {discoverData?.popular && discoverData.popular.length > 0 && (
         <CarouselBanner
           books={discoverData.popular}
@@ -21,7 +20,6 @@ export default function ForYouContent({ discoverData, onBookPress }: ForYouConte
         />
       )}
 
-      {/* Section Populaire */}
       {discoverData?.popular && discoverData.popular.length > 0 && (
         <View style={styles.section}>
           <SectionHeader title="Populaire" />
@@ -33,7 +31,6 @@ export default function ForYouContent({ discoverData, onBookPress }: ForYouConte
         </View>
       )}
 
-      {/* Section Les mieux notés */}
       {discoverData?.bestRated && discoverData.bestRated.length > 0 && (
         <View style={styles.section}>
           <SectionHeader title="Les mieux notés" />
@@ -45,7 +42,6 @@ export default function ForYouContent({ discoverData, onBookPress }: ForYouConte
         </View>
       )}
 
-      {/* Section Nouveautés */}
       {discoverData?.newBooks && discoverData.newBooks.length > 0 && (
         <View style={styles.section}>
           <SectionHeader title="Nouveautés" />
@@ -57,7 +53,6 @@ export default function ForYouContent({ discoverData, onBookPress }: ForYouConte
         </View>
       )}
 
-      {/* Section Recommandations */}
       {discoverData?.recommended && discoverData.recommended.length > 0 && (
         <View style={styles.section}>
           <SectionHeader title="Recommandations" />
@@ -69,7 +64,6 @@ export default function ForYouContent({ discoverData, onBookPress }: ForYouConte
         </View>
       )}
 
-      {/* Section Complétés */}
       {discoverData?.completed && discoverData.completed.length > 0 && (
         <View style={styles.section}>
           <SectionHeader title="Complétés" />
@@ -81,7 +75,6 @@ export default function ForYouContent({ discoverData, onBookPress }: ForYouConte
         </View>
       )}
 
-      {/* Section En cours utilisateur */}
       {discoverData?.userInProgress && discoverData.userInProgress.length > 0 && (
         <View style={styles.section}>
           <SectionHeader title="En cours" />

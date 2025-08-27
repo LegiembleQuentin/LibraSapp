@@ -140,7 +140,6 @@ export default function Discover() {
         onTabChange={handleTabChange}
       />
 
-      {/* Contenu de la page "Pour vous" */}
       {activeTab === 'pour-vous' && (
         <ForYouContent
           discoverData={discoverData}
@@ -148,7 +147,6 @@ export default function Discover() {
         />
       )}
 
-      {/* TODO: Ajouter les composants pour "Par tag" et "Récent" */}
       {activeTab === 'par-tag' && (
         <ByTagContent
           jwtToken={jwtToken!}

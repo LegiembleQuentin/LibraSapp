@@ -103,9 +103,7 @@ export default function ByTagContent({ jwtToken, onBookPress }: ByTagContentProp
   }, []);
 
   const handleLibraryChange = async (bookId: number, isInLibrary: boolean) => {
-    // Cette fonction sera appelée par BookRow quand l'utilisateur change le statut de la bibliothèque
-    // Les données seront automatiquement rechargées via useFocusEffect
-    console.log(`Livre ${bookId} ${isInLibrary ? 'ajouté à' : 'retiré de'} la bibliothèque`);
+    // TODO: a supprimer
   };
 
   if (error) {

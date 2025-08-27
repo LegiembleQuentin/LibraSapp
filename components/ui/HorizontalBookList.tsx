@@ -31,7 +31,7 @@ export default function HorizontalBookList({
         contentContainerStyle
       ]}
       decelerationRate="fast"
-      snapToInterval={variant === 'compact' ? 98 : 98} // 90 + 8
+      snapToInterval={variant === 'compact' ? 98 : 98}
     >
       {books.map((book) => (
         <BookCard

@@ -44,7 +44,6 @@ export default function Search() {
     }
   }, [debouncedQuery, isAuthenticated, jwtToken]);
 
-  // Vérifier les changements de bibliothèque à chaque focus
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
@@ -55,7 +54,6 @@ export default function Search() {
         try {
           const changedBookIds = await consumeLibraryChanges();
           
-          // Si des changements ont été détectés, recharger la recherche
           if (changedBookIds.length > 0 && isActive) {
             await performSearch(debouncedQuery);
           }
@@ -78,7 +76,6 @@ export default function Search() {
       setError(null);
       const data = await apiClient.searchBooks(query, jwtToken!) as BookDto[];
       setBooks(data);
-      // Optionnel: mettre à jour l'état d'appartenance via un autre endpoint si dispo
     } catch (err: any) {
       setError(err.message || 'Erreur lors de la recherche');
       setBooks([]);
@@ -96,10 +93,8 @@ export default function Search() {
 
   const handleLibraryChange = async (bookId: number, isInLibrary: boolean) => {
     try {
-      // Marquer le changement pour la synchronisation
       await markLibraryChanged(bookId);
       
-      // Mettre à jour l'état local
       setLibraryIds(prev => {
         const next = new Set(prev);
         if (isInLibrary) {
@@ -132,7 +127,6 @@ export default function Search() {
 
   return (
     <Screen>
-      {/* Header avec input de recherche et boutons */}
       <View style={styles.header}>
         <View style={styles.searchContainer}>
           <TextInput
@@ -148,7 +142,6 @@ export default function Search() {
             autoCorrect={false}
           />
           
-          {/* Boutons de switch d'affichage */}
           <View style={styles.viewToggleContainer}>
             <TouchableOpacity
               style={[
@@ -183,7 +176,6 @@ export default function Search() {
         </View>
       </View>
 
-      {/* Contenu de recherche */}
       <View style={styles.content}>
         {loading && (
           <View style={styles.loadingContainer}>
@@ -217,7 +209,6 @@ export default function Search() {
             contentContainerStyle={styles.booksContent}
           >
             {viewMode === 'grid' ? (
-              // Affichage en grille avec BookCard
               <View style={styles.grid}>
                 {books.map((book) => (
                   <View key={book.id} style={styles.cardContainer}>
@@ -230,7 +221,6 @@ export default function Search() {
                 ))}
               </View>
             ) : (
-              // Affichage en liste avec BookRow
               <View style={styles.list}>
                                      {books.map((book) => (
                        <BookRow
@@ -293,7 +283,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   viewToggleButtonActive: {
-    // Pas de style spécial pour l'état actif
   },
   content: {
     flex: 1,

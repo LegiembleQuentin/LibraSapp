@@ -66,7 +66,6 @@ export default function BookDetails() {
       setError(null);
 
       const bookData = await apiClient.getBookDetails(parseInt(id), jwtToken!) as BookDto;
-      // Déduire l'appartenance à la bibliothèque si userStatus présent, sinon via userCurrentVolume / heuristique
       const inLib = !!(bookData.userStatus || bookData.userCurrentVolume || 0);
       setIsInLibrary(!!inLib);
     } catch (err: any) {

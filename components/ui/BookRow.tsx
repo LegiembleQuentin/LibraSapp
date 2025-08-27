@@ -22,7 +22,6 @@ export default function BookRow({ book, onPress, onLibraryChange }: BookRowProps
   const { jwtToken } = useAuth();
   const [isInLibrary, setIsInLibrary] = useState<boolean>(book.isInUserLibrary || false);
 
-  // Synchroniser l'état local avec les changements de props
   useEffect(() => {
     setIsInLibrary(book.isInUserLibrary || false);
   }, [book.isInUserLibrary]);
@@ -55,13 +54,10 @@ export default function BookRow({ book, onPress, onLibraryChange }: BookRowProps
     try {
       await apiClient.switchInUserLibrary(book.id, jwtToken);
       
-      // Marquer le changement pour la synchronisation
       await markLibraryChanged(book.id);
       
-      // Mettre à jour l'état local immédiatement pour une réponse UI instantanée
       setIsInLibrary(prev => !prev);
       
-      // Notifier le composant parent du changement
       if (onLibraryChange) {
         onLibraryChange(book.id, !isInLibrary);
       }
@@ -76,14 +72,12 @@ export default function BookRow({ book, onPress, onLibraryChange }: BookRowProps
       onPress={() => onPress?.(book)}
       activeOpacity={0.8}
     >
-      {/* Couverture du livre */}
       <Image
         source={{ uri: book.imgUrl }}
         style={styles.cover}
         resizeMode="cover"
       />
 
-      {/* Informations du livre */}
       <View style={styles.info}>
         <View style={styles.headerRow}>
           <Text style={styles.title} numberOfLines={2}>

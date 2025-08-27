@@ -9,10 +9,10 @@ interface CarouselBannerProps {
 }
 
 const { width: screenWidth } = Dimensions.get('window');
-const CARD_WIDTH = screenWidth - 32; // Largeur de la carte
+const CARD_WIDTH = screenWidth - 32;
 const CARD_HEIGHT = 180;
-const CARD_SPACING = 16; // Espacement entre les cartes
-const TOTAL_CARD_WIDTH = CARD_WIDTH + CARD_SPACING; // Largeur totale incluant l'espacement
+const CARD_SPACING = 16;
+const TOTAL_CARD_WIDTH = CARD_WIDTH + CARD_SPACING;
 
 export default function CarouselBanner({ books, onBookPress }: CarouselBannerProps) {
   const { theme } = useTheme();
@@ -83,14 +83,13 @@ export default function CarouselBanner({ books, onBookPress }: CarouselBannerPro
                <View style={styles.info}>
                  <Text style={styles.title}>{getTitle(book)}</Text>
                  <Text style={styles.volumes}>{getVolumeText(book)}</Text>
-                 <Text style={styles.statusText}>{getStatusText(book.isCompleted || false)}</Text>
+                 <Text style={styles.statusText}>{getStatusText(book.completed || false)}</Text>
                </View>
              </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      {/* Indicateurs de pagination */}
       <View style={styles.pagination}>
         {displayBooks.map((_, index) => (
           <TouchableOpacity
@@ -113,13 +112,13 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: 16,
-    paddingRight: 0, // Espace supplémentaire à droite pour la dernière carte
+    paddingRight: 0,
   },
   card: {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     borderRadius: 16,
-    marginRight: CARD_SPACING, // Utilise la constante d'espacement
+    marginRight: CARD_SPACING,
     overflow: 'hidden',
     position: 'relative',
     shadowColor: '#000',

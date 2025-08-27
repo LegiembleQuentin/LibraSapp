@@ -82,7 +82,6 @@ export default function BookCoverAndMetadata({ book, isInLibrary, onToggleLibrar
 
   return (
     <View style={styles.container}>
-      {/* Couverture du livre */}
       <View style={styles.coverContainer}>
         <Image 
           source={{ uri: book.imgUrl }} 
@@ -91,9 +90,9 @@ export default function BookCoverAndMetadata({ book, isInLibrary, onToggleLibrar
         />
       </View>
 
-      {/* Métadonnées */}
+      
       <View style={styles.metadataContainer}>
-        {/* Ligne: Label + icône */}
+        
         <View style={styles.topRow}>
           <Text style={[styles.topLabel, { color: theme.colors.white }]}>Vous correspond à :</Text>
           <TouchableOpacity 
@@ -108,12 +107,12 @@ export default function BookCoverAndMetadata({ book, isInLibrary, onToggleLibrar
             />
           </TouchableOpacity>
         </View>
-        {/* Valeur en dessous en grand */}
+        
         <Text style={[styles.matchValue, { color: theme.colors.accent }]}>
           {book.userMatch ? `${book.userMatch}%` : 'N/A'}
         </Text>
 
-        {/* Ma note / Status / Volume actuel */}
+        
         <View style={styles.rowItem}>
           <Text style={[styles.rowLabel, { color: theme.colors.white }]}>Ma note :</Text>
           <View style={styles.rowValue}>
@@ -133,16 +132,16 @@ export default function BookCoverAndMetadata({ book, isInLibrary, onToggleLibrar
           </View>
         </View>
 
-        {/* Séparateur fin de bloc */}
+        
         <View style={[styles.separator, { borderColor: 'rgba(255,255,255,0.3)' }]} />
 
-        {/* Note globale alignée à gauche, votes à droite */}
+        
         <View style={styles.ratingRow}>
           <Text style={[styles.globalRating, { color: theme.colors.accent }]}>{getGlobalRating()}</Text>
           <Text style={[styles.voteCount, { color: theme.colors.white }]}>(56 256 votes)</Text>
         </View>
 
-        {/* Auteur, années, volumes */}
+        
         <Text style={[styles.author, { color: theme.colors.white }]}>{getAuthor()}</Text>
         <Text style={[styles.publicationYears, { color: theme.colors.white }]}>{getPublicationYears()}</Text>
         <Text style={[styles.volumes, { color: theme.colors.white }]}>{book.nbVolume} vol</Text>
