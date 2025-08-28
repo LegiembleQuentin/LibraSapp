@@ -1,15 +1,18 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, Image } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as MediaLibrary from 'expo-media-library';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../services/api/client';
+import { useScanContext } from '../../contexts/ScanContext';
 
 export default function ScanPage() {
   const { theme } = useTheme();
   const { jwtToken } = useAuth();
+  const { registerScanCallback, unregisterScanCallback } = useScanContext();
   const [facing, setFacing] = useState<CameraType>('back');
   const [isScanning, setIsScanning] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -18,6 +21,14 @@ export default function ScanPage() {
   
   // Utiliser le hook officiel pour les permissions
   const [permission, requestPermission] = useCameraPermissions();
+
+  // S'enregistrer comme callback de scan quand la page est montée
+  useEffect(() => {
+    registerScanCallback(takePicture);
+    return () => {
+      unregisterScanCallback();
+    };
+  }, [registerScanCallback, unregisterScanCallback]);
 
   const takePicture = async () => {
     if (cameraRef.current) {
@@ -185,6 +196,26 @@ export default function ScanPage() {
             </Text>
           </View>
         </CameraView>
+        
+        {/* Bouton de scan flottant au centre */}
+        <View style={styles.scanButtonContainer}>
+          <TouchableOpacity 
+            style={[styles.scanButton, { backgroundColor: theme.colors.accent }]}
+            onPress={takePicture}
+            disabled={isScanning}
+          >
+            {isScanning ? (
+              <ActivityIndicator color="black" size="large" />
+            ) : (
+              <View style={styles.scanButtonInner}>
+                <Ionicons name="scan-outline" size={32} color="black" />
+                <Text style={[styles.scanButtonText, { color: 'black' }]}>
+                  SCANNER
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.controlsContainer}>
@@ -195,15 +226,21 @@ export default function ScanPage() {
           <Text style={styles.buttonText}>Changer de caméra</Text>
         </TouchableOpacity>
         
+        {/* Bouton de scan principal */}
         <TouchableOpacity 
-          style={[styles.button, { backgroundColor: theme.colors.accent }]}
+          style={[styles.mainScanButton, { backgroundColor: theme.colors.accent }]}
           onPress={takePicture}
           disabled={isScanning}
         >
           {isScanning ? (
-            <ActivityIndicator color="black" />
+            <ActivityIndicator color="black" size="large" />
           ) : (
-            <Text style={[styles.buttonText, { color: 'black' }]}>Prendre la photo</Text>
+            <View style={styles.mainScanButtonContent}>
+              <Ionicons name="scan-outline" size={24} color="black" />
+              <Text style={[styles.mainScanButtonText, { color: 'black' }]}>
+                SCANNER LA COUVERTURE
+              </Text>
+            </View>
           )}
         </TouchableOpacity>
       </View>
@@ -319,6 +356,54 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     marginTop: 20,
+  },
+  scanButtonContainer: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  scanButton: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  scanButtonInner: {
+    alignItems: 'center',
+  },
+  scanButtonText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  mainScanButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 30,
+    minWidth: 200,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  mainScanButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  mainScanButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

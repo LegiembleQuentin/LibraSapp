@@ -13,7 +13,11 @@ const SIDE_MARGIN = 0;
 const ROW_PADDING_H = 28;
 const CENTER_EXTRA_GAP = 0;
 
-export default function Navbar({ state, descriptors, navigation }: BottomTabBarProps) {
+interface NavbarProps extends BottomTabBarProps {
+  onScanTrigger?: () => void;
+}
+
+export default function Navbar({ state, descriptors, navigation, onScanTrigger }: NavbarProps) {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
 
@@ -25,7 +29,6 @@ export default function Navbar({ state, descriptors, navigation }: BottomTabBarP
     if (n.includes('discover')) return 'book-outline';
     if (n.includes('library') || n.includes('biblio')) return 'bookmarks-outline';
     if (n.includes('search') || n.includes('recher')) return 'search-outline';
-    if (n.includes('scan')) return 'scan-outline';
     if (n.includes('options') || n.includes('settings')) return 'settings-outline';
     return 'ellipse-outline';
   };
@@ -138,7 +141,16 @@ export default function Navbar({ state, descriptors, navigation }: BottomTabBarP
       {/* --- FAB --- */}
       {scanIndex !== -1 && (
         <TouchableOpacity
-          onPress={() => onPress(state.routes[scanIndex].name, state.index === scanIndex)}
+          onPress={() => {
+            const isOnScanPage = state.index === scanIndex;
+            if (isOnScanPage && onScanTrigger) {
+              // Si on est déjà sur la page scan, déclencher le scan
+              onScanTrigger();
+            } else {
+              // Si on n'est pas sur la page scan, y naviguer
+              onPress(state.routes[scanIndex].name, false);
+            }
+          }}
           style={[
             styles.fab,
             {
