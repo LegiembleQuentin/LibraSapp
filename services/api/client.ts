@@ -177,6 +177,8 @@ class ApiClient {
   async scanCover(formData: FormData, token: string): Promise<string> {
     const url = `${this.baseUrl}/scan`;
 
+    console.log(url);
+
     const config: RequestInit = {
       method: 'POST',
       body: formData,
@@ -195,8 +197,10 @@ class ApiClient {
         throw new Error(`API Error ${response.status}: ${errorData}`);
       }
 
+      console.log(response);
       return await response.text();
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }
