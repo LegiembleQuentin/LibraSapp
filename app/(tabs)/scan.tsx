@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Alert, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../theme';
 import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../services/api/client';
@@ -15,6 +16,8 @@ export default function ScanPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [cameraKey, setCameraKey] = useState(0);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const cameraRef = useRef<CameraView>(null);
   
   const [permission, requestPermission] = useCameraPermissions();
@@ -32,6 +35,18 @@ export default function ScanPage() {
       processAndSendImage();
     }
   }, [capturedImage, isProcessing, jwtToken]);
+
+  // Réinitialiser l'état à chaque focus de la page
+  useFocusEffect(
+    React.useCallback(() => {
+      setCapturedImage(null);
+      setIsScanning(false);
+      setIsProcessing(false);
+      setCameraKey(prev => prev + 1);
+      
+      console.log('Page scan focus - état réinitialisé, caméra rechargée');
+    }, [])
+  );
 
   const takePicture = async () => {
     if (cameraRef.current) {
@@ -120,6 +135,27 @@ export default function ScanPage() {
     );
   }
 
+  if (cameraError) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
+        <View style={styles.errorContainer}>
+          <Text style={[styles.errorText, { color: theme.colors.textPrimary }]}>
+            {cameraError}
+          </Text>
+          <TouchableOpacity 
+            style={[styles.retryButton, { backgroundColor: theme.colors.accent }]}
+            onPress={() => {
+              setCameraError(null);
+              setCameraKey(prev => prev + 1);
+            }}
+          >
+            <Text style={[styles.retryButtonText, { color: 'black' }]}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   if (capturedImage) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
@@ -132,9 +168,14 @@ export default function ScanPage() {
     <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
       <View style={styles.cameraContainer}>
         <CameraView
+          key={cameraKey}
           ref={cameraRef}
           style={styles.camera}
           facing={facing}
+          onMountError={(error) => {
+            console.error('Erreur de montage de la caméra:', error);
+            setCameraError('Erreur de chargement de la caméra');
+          }}
         >
           <View style={styles.overlay}>
             <View style={styles.scanFrame}>
@@ -197,6 +238,28 @@ const styles = StyleSheet.create({
     right: -2,
     borderLeftWidth: 0,
     borderTopWidth: 0,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  retryButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
