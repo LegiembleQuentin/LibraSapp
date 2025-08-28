@@ -173,6 +173,34 @@ class ApiClient {
     });
   }
 
+  // Méthode pour scanner une couverture
+  async scanCover(formData: FormData, token: string): Promise<string> {
+    const url = `${this.baseUrl}/scan`;
+
+    const config: RequestInit = {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'API-Key': this.apiKey,
+        'Authorization': `Bearer ${token}`,
+        // Ne pas définir Content-Type pour FormData, il sera automatiquement défini
+      },
+    };
+
+    try {
+      const response = await fetch(url, config);
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`API Error ${response.status}: ${errorData}`);
+      }
+
+      return await response.text();
+    } catch (error) {
+      throw error;
+    }
+  }
+
 }
 
 export const apiClient = new ApiClient();

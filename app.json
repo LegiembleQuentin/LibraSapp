@@ -34,6 +34,20 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permettre à LibraS d'accéder à votre caméra pour scanner les couvertures de BD.",
+          "microphonePermission": "Permettre à LibraS d'accéder à votre microphone."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Permettre à LibraS d'accéder à vos photos pour sauvegarder les images scannées.",
+          "savePhotosPermission": "Permettre à LibraS de sauvegarder les images scannées dans votre galerie."
+        }
       ]
     ],
     "experiments": {

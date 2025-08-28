@@ -25,6 +25,7 @@ export default function Navbar({ state, descriptors, navigation }: BottomTabBarP
     if (n.includes('discover')) return 'book-outline';
     if (n.includes('library') || n.includes('biblio')) return 'bookmarks-outline';
     if (n.includes('search') || n.includes('recher')) return 'search-outline';
+    if (n.includes('scan')) return 'scan-outline';
     if (n.includes('options') || n.includes('settings')) return 'settings-outline';
     return 'ellipse-outline';
   };
