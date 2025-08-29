@@ -62,13 +62,17 @@ export default function BookCoverAndMetadata({
     if (book.userStatus) {
       switch (book.userStatus) {
         case 'COMPLETED':
-          return 'Complété';
-        case 'IN_PROGRESS':
+          return 'Terminé';
+        case 'READING':
           return 'En cours';
+        case 'TO_READ':
+          return 'À lire';
+        case 'IN_PROGRESS':
+          return 'En cours'; // Fallback pour l'ancien format
         case 'PLANNED':
-          return 'Prévu';
+          return 'Prévu'; // Fallback pour l'ancien format
         case 'DROPPED':
-          return 'Abandonné';
+          return 'Abandonné'; // Fallback pour l'ancien format
         default:
           return 'Non défini';
       }

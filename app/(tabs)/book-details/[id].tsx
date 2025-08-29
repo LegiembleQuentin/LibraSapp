@@ -122,25 +122,8 @@ export default function BookDetails() {
   const handleBookEditSave = (data: BookEditData) => {
     if (!book) return;
 
-    let hasChanged = false;
-    
-    switch (data.type) {
-      case 'rating':
-        hasChanged = book.userRating !== data.value;
-        break;
-      case 'status':
-        hasChanged = book.userStatus !== data.value;
-        break;
-      case 'volume':
-        hasChanged = book.userCurrentVolume !== data.value;
-        break;
-    }
-
-    if (!hasChanged) {
-      return;
-    }
-
-    const updatedBook = { ...book };
+    const baseBook = modifiedBook || book;
+    const updatedBook = { ...baseBook };
     
     switch (data.type) {
       case 'rating':
@@ -165,45 +148,15 @@ export default function BookDetails() {
 
   // Sauvegarder les modifications avant de quitter la page
   const saveModificationsBeforeLeaving = async () => {
-    console.log('🔍 Vérification des modifications:', { hasModifications, modifiedBook: !!modifiedBook, jwtToken: !!jwtToken });
-    
-    if (!hasModifications || !modifiedBook || !jwtToken) {
-      console.log('❌ Pas de modifications à sauvegarder');
-      return;
-    }
-
-    // Vérifier si le livre a vraiment changé par rapport à l'original
-    const hasRealChanges = 
-      book?.userRating !== modifiedBook.userRating ||
-      book?.userStatus !== modifiedBook.userStatus ||
-      book?.userCurrentVolume !== modifiedBook.userCurrentVolume;
-
-    if (!hasRealChanges) {
-      console.log('❌ Aucun changement réel détecté');
-      return;
-    }
-
-    console.log('✅ Sauvegarde des modifications:', {
-      original: {
-        rating: book?.userRating,
-        status: book?.userStatus,
-        volume: book?.userCurrentVolume
-      },
-      modified: {
-        rating: modifiedBook.userRating,
-        status: modifiedBook.userStatus,
-        volume: modifiedBook.userCurrentVolume
-      }
-    });
+    if (!hasModifications || !modifiedBook || !jwtToken) return;
 
     try {
       // Appel API en arrière-plan (ne pas attendre la réponse)
       apiClient.updateBook(modifiedBook, jwtToken).catch((error: any) => {
-        console.error('❌ Erreur lors de la sauvegarde des modifications:', error);
+        console.error('Erreur lors de la sauvegarde des modifications:', error);
       });
-      console.log('🚀 Appel API de mise à jour envoyé');
     } catch (error: any) {
-      console.error('❌ Erreur lors de la sauvegarde des modifications:', error);
+      console.error('Erreur lors de la sauvegarde des modifications:', error);
     }
   };
 
