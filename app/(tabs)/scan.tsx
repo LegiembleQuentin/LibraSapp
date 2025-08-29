@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Alert, ActivityIndicator, Text, TouchableOpacity, Dimensions, Image } from 'react-native';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { View, StyleSheet, Alert, ActivityIndicator, Text, TouchableOpacity, Dimensions, Image, Modal } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { useFocusEffect } from '@react-navigation/native';
+import { router } from 'expo-router';
 import { useTheme } from '../../theme';
 import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../services/api/client';
@@ -24,6 +25,7 @@ export default function ScanPage() {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const cameraRef = useRef<CameraView>(null);
   const [cameraLayout, setCameraLayout] = useState({ width: 0, height: 0 });
+  const [showNoBookModal, setShowNoBookModal] = useState(false);
   
   const [permission, requestPermission] = useCameraPermissions();
 
@@ -126,7 +128,34 @@ export default function ScanPage() {
 
       const response = await apiClient.scanCover(formData, jwtToken);
       
-      Alert.alert('Succès', 'Couverture scannée avec succès !');
+      // Vérifier le type de réponse
+      if (typeof response === 'string') {
+        if (response === "") {
+          // Aucun livre trouvé - afficher la modale personnalisée
+          setShowNoBookModal(true);
+        } else {
+          // Rediriger vers la page du livre trouvé
+          const bookId = parseInt(response, 10);
+          if (!isNaN(bookId)) {
+            router.push({
+              pathname: '/(tabs)/book-details/[id]',
+              params: { id: bookId.toString(), from: 'scan' }
+            });
+          }
+        }
+      } else if (response && typeof response === 'object' && 'id' in response) {
+        // Réponse avec objet contenant l'ID
+        const bookId = (response as any).id;
+        if (bookId) {
+          router.push({
+            pathname: '/(tabs)/book-details/[id]',
+            params: { id: bookId.toString(), from: 'scan' }
+          });
+        }
+      } else {
+        // Réponse inattendue
+        Alert.alert('Erreur', 'Format de réponse inattendu');
+      }
       
       setCapturedImage(null);
       
@@ -230,6 +259,39 @@ export default function ScanPage() {
           </View>
         </CameraView>
       </View>
+      
+      {/* Modale personnalisée pour "Aucun livre trouvé" */}
+      <Modal
+        visible={showNoBookModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowNoBookModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.backgroundPrimary }]}>
+            <View style={styles.modalIconContainer}>
+              <Text style={[styles.modalIcon, { color: theme.colors.accent }]}>📚</Text>
+            </View>
+            
+            <Text style={[styles.modalTitle, { color: theme.colors.textPrimary }]}>
+              Aucun livre trouvé
+            </Text>
+            
+            <Text style={[styles.modalMessage, { color: theme.colors.textSecondary }]}>
+              La couverture scannée ne correspond à aucun livre de notre base de données.
+            </Text>
+            
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: theme.colors.accent }]}
+              onPress={() => setShowNoBookModal(false)}
+            >
+              <Text style={[styles.modalButtonText, { color: 'black' }]}>
+                Réessayer
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -372,6 +434,57 @@ const styles = StyleSheet.create({
   instructionsSubtext: {
     fontSize: 14,
     textAlign: 'center',
+  },
+  // Styles pour la modale personnalisée
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '80%',
+    maxWidth: 350,
+    padding: 25,
+    borderRadius: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalIconContainer: {
+    marginBottom: 20,
+  },
+  modalIcon: {
+    fontSize: 60,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  modalMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 25,
+  },
+  modalButton: {
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 25,
+    minWidth: 140,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
