@@ -27,34 +27,7 @@ export default function ScanPage() {
   
   const [permission, requestPermission] = useCameraPermissions();
 
-  useEffect(() => {
-    registerScanCallback(takePicture);
-    return () => {
-      unregisterScanCallback();
-    };
-  }, [registerScanCallback, unregisterScanCallback]);
-
-  // Traiter l'image capturée de manière asynchrone
-  useEffect(() => {
-    if (capturedImage && !isProcessing) {
-      // En mode debug, on ne traite pas automatiquement l'image
-      // processAndSendImage(); // DÉSACTIVÉ TEMPORAIREMENT
-      console.log('DEBUG: Image capturée, mode debug activé');
-    }
-  }, [capturedImage, isProcessing, jwtToken]);
-
-  // Réinitialiser l'état à chaque focus de la page
-  useFocusEffect(
-    React.useCallback(() => {
-      setCapturedImage(null);
-      setIsScanning(false);
-      setIsProcessing(false);
-      setCameraKey(prev => prev + 1);
-      
-    }, [])
-  );
-
-  const takePicture = async () => {
+  const takePicture = React.useCallback(async () => {
     if (cameraRef.current && cameraLayout.width > 0 && cameraLayout.height > 0) {
       try {
         setIsScanning(true);
@@ -62,46 +35,32 @@ export default function ScanPage() {
           quality: 0.8,
           base64: false,
         });
-  
+
+        // Calculer le ratio de l'image et prendre seulement la partie scannée en qualité reduite pour l'envoi
         const { width: imageWidth, height: imageHeight } = photo;
         const previewWidth = cameraLayout.width;
         const previewHeight = cameraLayout.height;
-  
-        // Calculate the image's aspect ratio
+        
         const imageAspectRatio = imageWidth / imageHeight;
-        // Calculate the preview container's aspect ratio
         const previewAspectRatio = previewWidth / previewHeight;
   
         let cropX, cropY, actualFrameWidth, actualFrameHeight;
   
         if (imageAspectRatio > previewAspectRatio) {
-          // The image is wider than the preview, so the height is constrained.
-          // We calculate scale based on height, which is correctly matched.
           const scale = imageHeight / previewHeight;
           actualFrameWidth = SCAN_FRAME_WIDTH * scale;
           actualFrameHeight = SCAN_FRAME_HEIGHT * scale;
           
-          // Center the crop horizontally
           cropX = (imageWidth - actualFrameWidth) / 2;
           cropY = (imageHeight - actualFrameHeight) / 2;
         } else {
-          // The image is taller than the preview, so the width is constrained.
-          // We calculate scale based on width.
           const scale = imageWidth / previewWidth;
           actualFrameWidth = SCAN_FRAME_WIDTH * scale;
           actualFrameHeight = SCAN_FRAME_HEIGHT * scale;
           
-          // Center the crop vertically
           cropX = (imageWidth - actualFrameWidth) / 2;
           cropY = (imageHeight - actualFrameHeight) / 2;
         }
-  
-        console.log('Recadrage final:', {
-          image: { width: imageWidth, height: imageHeight },
-          preview: { width: previewWidth, height: previewHeight },
-          actualFrame: { width: actualFrameWidth, height: actualFrameHeight },
-          crop: { x: cropX, y: cropY, width: actualFrameWidth, height: actualFrameHeight }
-        });
   
         const croppedImage = await ImageManipulator.manipulateAsync(
           photo.uri,
@@ -121,29 +80,60 @@ export default function ScanPage() {
         setCapturedImage(croppedImage.uri);
         setIsScanning(false);
       } catch (error) {
-        console.error('Erreur lors de la prise de photo:', error);
+        console.error('❌ Erreur lors de la prise de photo:', error);
         setIsScanning(false);
-        Alert.alert('Erreur', 'Impossible de prendre la photo');
       }
+    } else {
+      Alert.alert('Erreur', 'Caméra non prête. Attendez que la caméra soit initialisée.');
     }
-  };
+    }, [cameraLayout.width, cameraLayout.height]);
+
+  useEffect(() => {
+    registerScanCallback(takePicture);
+    return () => {
+      unregisterScanCallback();
+    };
+  }, [takePicture, registerScanCallback, unregisterScanCallback]);
+
+  useEffect(() => {
+    if (capturedImage && !isProcessing) {
+      processAndSendImage();
+    }
+  }, [capturedImage, isProcessing, jwtToken]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setCapturedImage(null);
+      setIsScanning(false);
+      setIsProcessing(false);
+      setCameraKey(prev => prev + 1);
+      
+    }, [])
+  );
 
   const processAndSendImage = async () => {
-    if (!capturedImage) return;
+    if (!capturedImage || !jwtToken) return;
 
     try {
       setIsProcessing(true);
       
-      // TEMPORAIRE : Afficher l'image au lieu d'envoyer l'API
-              console.log('DEBUG: Image recadrée affichée:', capturedImage);
-        
-        // En mode debug, on affiche directement l'image
-        // Pas besoin de processAndSendImage
-        setIsProcessing(false);
+      const formData = new FormData();
+      formData.append('image', {
+        uri: capturedImage,
+        type: 'image/jpeg',
+        name: 'cover.jpg',
+      } as any);
+
+      const response = await apiClient.scanCover(formData, jwtToken);
+      
+      Alert.alert('Succès', 'Couverture scannée avec succès !');
+      
+      setCapturedImage(null);
       
     } catch (error) {
-      console.error('Erreur lors du debug:', error);
-      Alert.alert('Erreur', 'Erreur lors du debug');
+      console.error('Erreur lors du scan:', error);
+      Alert.alert('Erreur', 'Impossible de traiter l\'image');
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -188,33 +178,7 @@ export default function ScanPage() {
   if (capturedImage) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
-        <View style={styles.debugContainer}>
-          <Text style={[styles.debugTitle, { color: theme.colors.textPrimary }]}>
-            DEBUG: Image recadrée
-          </Text>
-          <Image 
-            source={{ uri: capturedImage }} 
-            style={styles.debugImage}
-            resizeMode="contain"
-          />
-          <View style={styles.debugButtons}>
-            <TouchableOpacity 
-              style={[styles.debugButton, { backgroundColor: theme.colors.accent }]}
-              onPress={() => setCapturedImage(null)}
-            >
-              <Text style={[styles.debugButtonText, { color: 'black' }]}>Nouveau scan</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.debugButton, { backgroundColor: '#FF6B6B' }]}
-              onPress={() => {
-                console.log('DEBUG: URI de l\'image:', capturedImage);
-                Alert.alert('DEBUG', 'URI copié dans la console !');
-              }}
-            >
-              <Text style={[styles.debugButtonText, { color: 'white' }]}>Voir URI</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <ActivityIndicator size="large" color={theme.colors.accent} />
       </View>
     );
   }
@@ -244,6 +208,24 @@ export default function ScanPage() {
               <View style={[styles.corner, styles.cornerTopRight]} />
               <View style={[styles.corner, styles.cornerBottomLeft]} />
               <View style={[styles.corner, styles.cornerBottomRight]} />
+            </View>
+            
+            {isScanning && (
+              <View style={styles.scanningIndicator}>
+                <ActivityIndicator size="large" color={theme.colors.accent} />
+                <Text style={[styles.scanningText, { color: theme.colors.accent }]}>
+                  Scan en cours...
+                </Text>
+              </View>
+            )}
+            
+            <View style={styles.instructions}>
+              <Text style={[styles.instructionsText, { color: theme.colors.white }]}>
+                Placez la couverture du livre dans le cadre
+              </Text>
+              <Text style={[styles.instructionsSubtext, { color: theme.colors.white }]}>
+                Appuyez sur le bouton scan pour analyser
+              </Text>
             </View>
           </View>
         </CameraView>
@@ -357,6 +339,39 @@ const styles = StyleSheet.create({
   debugButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  scanningIndicator: {
+    position: 'absolute',
+    top: '50%',
+    transform: [{ translateY: -50 }],
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    padding: 20,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  scanningText: {
+    marginLeft: 10,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  instructions: {
+    position: 'absolute',
+    bottom: 20,
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  instructionsText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  instructionsSubtext: {
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
 
