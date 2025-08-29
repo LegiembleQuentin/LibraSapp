@@ -8,6 +8,7 @@ import { useTheme } from '../../theme';
 import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../services/api/client';
 import { useScanContext } from '../../contexts/ScanContext';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Constantes pour les dimensions du scanFrame
 const SCAN_FRAME_WIDTH = 300;
@@ -128,10 +129,8 @@ export default function ScanPage() {
 
       const response = await apiClient.scanCover(formData, jwtToken);
       
-      // Vérifier le type de réponse
       if (typeof response === 'string') {
         if (response === "") {
-          // Aucun livre trouvé - afficher la modale personnalisée
           setShowNoBookModal(true);
         } else {
           // Rediriger vers la page du livre trouvé
@@ -206,7 +205,7 @@ export default function ScanPage() {
 
   if (capturedImage) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
+      <View style={[styles.activityIndicatorContainer, { backgroundColor: theme.colors.backgroundPrimary }]}>
         <ActivityIndicator size="large" color={theme.colors.accent} />
       </View>
     );
@@ -260,7 +259,6 @@ export default function ScanPage() {
         </CameraView>
       </View>
       
-      {/* Modale personnalisée pour "Aucun livre trouvé" */}
       <Modal
         visible={showNoBookModal}
         transparent={true}
@@ -268,11 +266,12 @@ export default function ScanPage() {
         onRequestClose={() => setShowNoBookModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.colors.backgroundPrimary }]}>
-            <View style={styles.modalIconContainer}>
-              <Text style={[styles.modalIcon, { color: theme.colors.accent }]}>📚</Text>
-            </View>
-            
+        <LinearGradient
+          colors={[theme.gradient.start, theme.gradient.end]}
+          style={[styles.modalContent]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+        >
             <Text style={[styles.modalTitle, { color: theme.colors.textPrimary }]}>
               Aucun livre trouvé
             </Text>
@@ -289,8 +288,8 @@ export default function ScanPage() {
                 Réessayer
               </Text>
             </TouchableOpacity>
+          </LinearGradient>
           </View>
-        </View>
       </Modal>
     </View>
   );
@@ -366,7 +365,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  // Styles pour le debug
   debugContainer: {
     flex: 1,
     padding: 20,
@@ -404,20 +402,24 @@ const styles = StyleSheet.create({
   },
   scanningIndicator: {
     position: 'absolute',
-    top: '50%',
-    transform: [{ translateY: -50 }],
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.7)',
-    padding: 20,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 1,
   },
+  scanningContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   scanningText: {
-    marginLeft: 10,
+    marginTop: 12,
     fontSize: 18,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   instructions: {
     position: 'absolute',
@@ -435,7 +437,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
-  // Styles pour la modale personnalisée
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
@@ -443,48 +444,58 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    width: '80%',
-    maxWidth: 350,
-    padding: 25,
-    borderRadius: 20,
+    width: '85%',
+    maxWidth: 320,
+    padding: 28,
+    borderRadius: 16,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 10,
+      height: 8,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  modalIconContainer: {
-    marginBottom: 20,
-  },
-  modalIcon: {
-    fontSize: 60,
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
   },
   modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 15,
+    marginBottom: 16,
+    letterSpacing: 0.5,
   },
   modalMessage: {
-    fontSize: 16,
+    fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 25,
+    marginBottom: 28,
+    paddingHorizontal: 8,
   },
   modalButton: {
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 25,
-    minWidth: 140,
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 12,
+    minWidth: 130,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   modalButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+  },
+  activityIndicatorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
