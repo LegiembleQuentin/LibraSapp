@@ -201,6 +201,13 @@ class ApiClient {
     }
   }
 
+  async updateBook(bookData: any, token: string) {
+    return this.makeAuthenticatedRequest('/book/update', token, {
+      method: 'POST',
+      body: JSON.stringify(bookData),
+    });
+  }
+
 }
 
 export const apiClient = new ApiClient();
