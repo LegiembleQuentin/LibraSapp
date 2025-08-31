@@ -97,28 +97,28 @@ export default function BookDetails() {
   };
 
   const openRatingModal = () => {
-    if (!book) return;
+    if (!displayBook) return;
     setBookEditData({
       type: 'rating',
-      value: book.userRating || 0
+      value: displayBook.userRating || 0
     });
     setIsBookEditModalVisible(true);
   };
 
   const openStatusModal = () => {
-    if (!book) return;
+    if (!displayBook) return;
     setBookEditData({
       type: 'status',
-      value: (book.userStatus as BookStatus) || 'TO_READ'
+      value: (displayBook.userStatus as BookStatus) || 'TO_READ'
     });
     setIsBookEditModalVisible(true);
   };
 
   const openVolumeModal = () => {
-    if (!book) return;
+    if (!displayBook) return;
     setBookEditData({
       type: 'volume',
-      value: book.userCurrentVolume || 0
+      value: displayBook.userCurrentVolume || 0
     });
     setIsBookEditModalVisible(true);
   };
@@ -236,31 +236,33 @@ export default function BookDetails() {
     );
   }
 
+  const displayBook = modifiedBook || book;
+
   return (
     <Screen>
       <Header 
         showBackButton 
         onBackPress={handleBackPress}
-        title={book.names && book.names.length > 0 ? book.names[0] : 'Sans titre'}
+        title={displayBook.names && displayBook.names.length > 0 ? displayBook.names[0] : 'Sans titre'}
       />
       
       <View style={styles.container}>
         <BookCoverAndMetadata 
-          book={book} 
+          book={displayBook} 
           isInLibrary={isInLibrary} 
           onToggleLibrary={handleToggleLibrary}
           onEditRating={openRatingModal}
           onEditStatus={openStatusModal}
           onEditVolume={openVolumeModal}
         />
-        <BookTags book={book} />
-        <BookSynopsis book={book} />
+        <BookTags book={displayBook} />
+        <BookSynopsis book={displayBook} />
         
-        {book.sameAuthorBooks && book.sameAuthorBooks.size > 0 && (
+        {displayBook.sameAuthorBooks && displayBook.sameAuthorBooks.size > 0 && (
           <View style={styles.section}>
             <SectionHeader title="Du même auteur" />
             <HorizontalBookList 
-              books={Array.from(book.sameAuthorBooks)} 
+              books={Array.from(displayBook.sameAuthorBooks)} 
               onBookPress={(book) => router.push({
                 pathname: '/(tabs)/book-details/[id]',
                 params: { id: book.id.toString(), from: 'book-details' }
@@ -277,7 +279,7 @@ export default function BookDetails() {
           onSave={handleBookEditSave}
           type={bookEditData.type}
           currentValue={bookEditData.value}
-          maxVolume={book.nbVolume}
+          maxVolume={displayBook.nbVolume}
         />
       )}
     </Screen>
