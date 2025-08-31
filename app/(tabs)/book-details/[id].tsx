@@ -13,6 +13,7 @@ import BookTags from '../../../components/content/BookTags';
 import BookSynopsis from '../../../components/content/BookSynopsis';
 import HorizontalBookList from '../../../components/ui/HorizontalBookList';
 import SectionHeader from '../../../components/ui/SectionHeader';
+import BookEditModal, { BookEditData, BookStatus } from '../../../components/ui/BookEditModal';
 
 export default function BookDetails() {
   const { theme } = useTheme();
@@ -22,6 +23,10 @@ export default function BookDetails() {
   const [isInLibrary, setIsInLibrary] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isBookEditModalVisible, setIsBookEditModalVisible] = useState(false);
+  const [bookEditData, setBookEditData] = useState<BookEditData | null>(null);
+  const [hasModifications, setHasModifications] = useState(false);
+  const [modifiedBook, setModifiedBook] = useState<BookDto | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -87,7 +92,78 @@ export default function BookDetails() {
     }
   };
 
-  const handleBackPress = () => {
+  const openRatingModal = () => {
+    if (!book) return;
+    setBookEditData({
+      type: 'rating',
+      value: book.userRating || 0
+    });
+    setIsBookEditModalVisible(true);
+  };
+
+  const openStatusModal = () => {
+    if (!book) return;
+    setBookEditData({
+      type: 'status',
+      value: (book.userStatus as BookStatus) || 'TO_READ'
+    });
+    setIsBookEditModalVisible(true);
+  };
+
+  const openVolumeModal = () => {
+    if (!book) return;
+    setBookEditData({
+      type: 'volume',
+      value: book.userCurrentVolume || 0
+    });
+    setIsBookEditModalVisible(true);
+  };
+
+  const handleBookEditSave = (data: BookEditData) => {
+    if (!book) return;
+
+    const baseBook = modifiedBook || book;
+    const updatedBook = { ...baseBook };
+    
+    switch (data.type) {
+      case 'rating':
+        updatedBook.userRating = data.value as number;
+        break;
+      case 'status':
+        updatedBook.userStatus = data.value as BookStatus;
+        break;
+      case 'volume':
+        updatedBook.userCurrentVolume = data.value as number;
+        break;
+    }
+
+    setModifiedBook(updatedBook);
+    setHasModifications(true);
+  };
+
+  const closeBookEditModal = () => {
+    setIsBookEditModalVisible(false);
+    setBookEditData(null);
+  };
+
+  // Sauvegarder les modifications avant de quitter la page
+  const saveModificationsBeforeLeaving = async () => {
+    if (!hasModifications || !modifiedBook || !jwtToken) return;
+
+    try {
+      // Appel API en arrière-plan (ne pas attendre la réponse)
+      apiClient.updateBook(modifiedBook, jwtToken).catch((error: any) => {
+        console.error('Erreur lors de la sauvegarde des modifications:', error);
+      });
+    } catch (error: any) {
+      console.error('Erreur lors de la sauvegarde des modifications:', error);
+    }
+  };
+
+  // Modifier handleBackPress pour sauvegarder avant de partir
+  const handleBackPress = async () => {
+    await saveModificationsBeforeLeaving();
+    
     if (from) {
       switch (from) {
         case 'discover':
@@ -142,11 +218,18 @@ export default function BookDetails() {
       />
       
       <View style={styles.container}>
-        <BookCoverAndMetadata book={book} isInLibrary={isInLibrary} onToggleLibrary={handleToggleLibrary} />
+        <BookCoverAndMetadata 
+          book={book} 
+          isInLibrary={isInLibrary} 
+          onToggleLibrary={handleToggleLibrary}
+          onEditRating={openRatingModal}
+          onEditStatus={openStatusModal}
+          onEditVolume={openVolumeModal}
+        />
         <BookTags book={book} />
         <BookSynopsis book={book} />
         
-        {book.sameAuthorBooks&& (
+        {book.sameAuthorBooks && book.sameAuthorBooks.size > 0 && (
           <View style={styles.section}>
             <SectionHeader title="Du même auteur" />
             <HorizontalBookList 
@@ -159,6 +242,17 @@ export default function BookDetails() {
           </View>
         )}
       </View>
+      
+      {bookEditData && (
+        <BookEditModal
+          visible={isBookEditModalVisible}
+          onClose={closeBookEditModal}
+          onSave={handleBookEditSave}
+          type={bookEditData.type}
+          currentValue={bookEditData.value}
+          maxVolume={book.nbVolume}
+        />
+      )}
     </Screen>
   );
 }

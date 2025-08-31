@@ -15,9 +15,19 @@ interface BookCoverAndMetadataProps {
   book: BookDto;
   isInLibrary?: boolean;
   onToggleLibrary?: (bookId: number) => void;
+  onEditRating?: () => void;
+  onEditStatus?: () => void;
+  onEditVolume?: () => void;
 }
 
-export default function BookCoverAndMetadata({ book, isInLibrary, onToggleLibrary }: BookCoverAndMetadataProps) {
+export default function BookCoverAndMetadata({ 
+  book, 
+  isInLibrary, 
+  onToggleLibrary,
+  onEditRating,
+  onEditStatus,
+  onEditVolume
+}: BookCoverAndMetadataProps) {
   const { theme } = useTheme();
   const { jwtToken } = useAuth();
 
@@ -52,13 +62,17 @@ export default function BookCoverAndMetadata({ book, isInLibrary, onToggleLibrar
     if (book.userStatus) {
       switch (book.userStatus) {
         case 'COMPLETED':
-          return 'Complété';
-        case 'IN_PROGRESS':
+          return 'Terminé';
+        case 'READING':
           return 'En cours';
+        case 'TO_READ':
+          return 'À lire';
+        case 'IN_PROGRESS':
+          return 'En cours'; // Fallback pour l'ancien format
         case 'PLANNED':
-          return 'Prévu';
+          return 'Prévu'; // Fallback pour l'ancien format
         case 'DROPPED':
-          return 'Abandonné';
+          return 'Abandonné'; // Fallback pour l'ancien format
         default:
           return 'Non défini';
       }
@@ -113,24 +127,41 @@ export default function BookCoverAndMetadata({ book, isInLibrary, onToggleLibrar
         </Text>
 
         
-        <View style={styles.rowItem}>
+        <TouchableOpacity 
+          style={styles.rowItem} 
+          onPress={onEditRating}
+          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+        >
           <Text style={[styles.rowLabel, { color: theme.colors.white }]}>Ma note :</Text>
           <View style={styles.rowValue}>
             <Text style={[styles.rowValueText, { color: theme.colors.accent }]}>{book.userRating || '-'}</Text>
+            <Ionicons name="chevron-forward" size={16} color={theme.colors.accent} />
           </View>
-        </View>
-        <View style={styles.rowItem}>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.rowItem} 
+          onPress={onEditStatus}
+          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+        >
           <Text style={[styles.rowLabel, { color: theme.colors.white }]}>Status :</Text>
           <View style={styles.rowValue}>
             <Text style={[styles.rowValueText, { color: theme.colors.accent }]}>{getUserStatus()}</Text>
+            <Ionicons name="chevron-forward" size={16} color={theme.colors.accent} />
           </View>
-        </View>
-        <View style={styles.rowItem}>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.rowItem} 
+          onPress={onEditVolume}
+          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+        >
           <Text style={[styles.rowLabel, { color: theme.colors.white }]}>Volume actuel :</Text>
           <View style={styles.rowValue}>
             <Text style={[styles.rowValueText, { color: theme.colors.accent }]}>{book.userCurrentVolume || '-'}</Text>
+            <Ionicons name="chevron-forward" size={16} color={theme.colors.accent} />
           </View>
-        </View>
+        </TouchableOpacity>
 
         
         <View style={[styles.separator, { borderColor: 'rgba(255,255,255,0.3)' }]} />
