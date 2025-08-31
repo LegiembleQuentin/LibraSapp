@@ -1,17 +1,48 @@
 import React from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, ScrollView } from 'react-native';
 import Screen from '../../components/ui/Screen';
 import { useTheme } from '../../theme';
 import PrimaryButton from '../../components/ui/PrimaryButton';
+import OptionItem from '../../components/ui/OptionItem';
 import { authService } from '../../services/auth/authService';
 import { router } from 'expo-router';
 
 export default function Options() {
   const { theme } = useTheme();
+  
+  const handleCGU = () => {
+    router.push('/(options)/cgu');
+  };
+
+  const handleMentionsLegales = () => {
+    router.push('/(options)/mentions-legales');
+  };
+
   return (
     <Screen>
       <View style={styles.container}>
         <Text style={[styles.title, { color: theme.colors.textPrimary, fontFamily: theme.fonts.heading }]}>Options</Text>
+        
+        <ScrollView style={styles.optionsContainer} showsVerticalScrollIndicator={false}>
+          <OptionItem
+            title="Conditions Générales d'Utilisation"
+            subtitle="Lire les CGU de l'application"
+            onPress={handleCGU}
+          />
+          
+          <OptionItem
+            title="Mentions Légales"
+            subtitle="Informations légales et réglementaires"
+            onPress={handleMentionsLegales}
+          />
+          
+          <OptionItem
+            title="À propos"
+            subtitle="Informations sur l'application"
+            onPress={() => Alert.alert('À propos', 'LibraS v1.0.0')}
+          />
+        </ScrollView>
+        
         <View style={styles.btns}>
           <PrimaryButton
             title={'Se déconnecter'}
@@ -39,6 +70,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginTop: 12,
     marginBottom: 8,
+  },
+  optionsContainer: {
+    flex: 1,
+    marginTop: 20,
+    marginBottom: 20,
   },
   btns: {
     marginTop: 24,
