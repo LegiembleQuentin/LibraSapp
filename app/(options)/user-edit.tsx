@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, Switch } from 'react-native';
 import Screen from '../../components/ui/Screen';
 import Input from '../../components/ui/Input';
 import PrimaryButton from '../../components/ui/PrimaryButton';
@@ -10,6 +10,7 @@ import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail, updatePassword } from 'firebase/auth';
 import Header from '../../components/ui/Header';
 import { router, useLocalSearchParams } from 'expo-router';
+import * as Location from 'expo-location';
 
 const USER_PROFILE_KEY = '@libras_user_profile';
 
@@ -23,6 +24,8 @@ export default function UserEdit() {
   const [email, setEmail] = useState('');
   const [country, setCountry] = useState('');
   const [age, setAge] = useState('');
+  const [useLocationForCountry, setUseLocationForCountry] = useState(false);
+  const [locating, setLocating] = useState(false);
 
   const [emailError, setEmailError] = useState('');
   const [ageError, setAgeError] = useState('');
@@ -81,6 +84,50 @@ export default function UserEdit() {
       setResetEmail(initialEmail);
     }
   }, [params]);
+
+  const detectCountryFromLocation = async (): Promise<string | null> => {
+    try {
+      setLocating(true);
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission requise', "L'accès à la localisation est nécessaire pour détecter le pays.");
+        return null;
+      }
+      const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const results = await Location.reverseGeocodeAsync({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+      if (results && results.length > 0) {
+        const first = results[0] as any;
+        const detected = first?.country || first?.isoCountryCode || '';
+        return detected || null;
+      }
+      return null;
+    } catch (e) {
+      Alert.alert('Erreur', 'Impossible de détecter votre pays.');
+      return null;
+    } finally {
+      setLocating(false);
+    }
+  };
+
+  const handleToggleUseLocation = async (value: boolean) => {
+    if (value) {
+      const detected = await detectCountryFromLocation();
+      if (!detected) {
+        setUseLocationForCountry(false);
+        return;
+      }
+      Alert.alert(
+        'Confirmer',
+        `Pays détecté: ${detected}. Voulez-vous utiliser ce pays ?`,
+        [
+          { text: 'Annuler', style: 'cancel', onPress: () => setUseLocationForCountry(false) },
+          { text: 'Oui', style: 'default', onPress: () => { setCountry(detected); setUseLocationForCountry(true); } },
+        ]
+      );
+    } else {
+      setUseLocationForCountry(false);
+    }
+  };
 
   const handleSaveProfile = async () => {
     setEmailError('');
@@ -213,18 +260,23 @@ export default function UserEdit() {
           error={emailError}
         />
         <Input
-          placeholder="Pays"
-          value={country}
-          onChangeText={setCountry}
-          autoCapitalize="words"
-        />
-        <Input
           placeholder="Âge"
           value={age}
           onChangeText={setAge}
           keyboardType="numeric"
           error={ageError}
         />
+        <View style={styles.countryRow}>
+          <View style={styles.countryTextContainer}>
+            <Text style={[styles.countryLabel, { color: theme.colors.textPrimary }]}>Pays</Text>
+            <Text style={{ color: theme.colors.textSecondary }}>{country || 'Non détecté'}</Text>
+          </View>
+          <Switch
+            value={useLocationForCountry}
+            onValueChange={handleToggleUseLocation}
+            disabled={locating}
+          />
+        </View>
       </View>
       <View style={styles.buttonContainer}>
         <PrimaryButton title={loading ? 'Enregistrement...' : 'Enregistrer'} onPress={handleSaveProfile} disabled={loading} />
@@ -307,8 +359,8 @@ export default function UserEdit() {
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 100,
     flexGrow: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 12,
   },
@@ -321,6 +373,22 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 300,
     marginBottom: 20,
+  },
+  countryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+    marginBottom: 16,
+  },
+  countryTextContainer: {
+    flexShrink: 1,
+    paddingRight: 12,
+  },
+  countryLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
   },
   buttonContainer: {
     textAlign: 'center',
