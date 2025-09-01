@@ -43,6 +43,10 @@ export default function BookDetails() {
   
           if (!isActive) return;
           setBook(bookData);
+          
+          // Réinitialiser les modifications à chaque nouveau livre
+          setModifiedBook(null);
+          setHasModifications(false);
   
           const inLib = Boolean(bookData.userStatus || bookData.userCurrentVolume);
           setIsInLibrary(inLib);
@@ -93,28 +97,28 @@ export default function BookDetails() {
   };
 
   const openRatingModal = () => {
-    if (!book) return;
+    if (!displayBook) return;
     setBookEditData({
       type: 'rating',
-      value: book.userRating || 0
+      value: displayBook.userRating || 0
     });
     setIsBookEditModalVisible(true);
   };
 
   const openStatusModal = () => {
-    if (!book) return;
+    if (!displayBook) return;
     setBookEditData({
       type: 'status',
-      value: (book.userStatus as BookStatus) || 'TO_READ'
+      value: (displayBook.userStatus as BookStatus) || 'TO_READ'
     });
     setIsBookEditModalVisible(true);
   };
 
   const openVolumeModal = () => {
-    if (!book) return;
+    if (!displayBook) return;
     setBookEditData({
       type: 'volume',
-      value: book.userCurrentVolume || 0
+      value: displayBook.userCurrentVolume || 0
     });
     setIsBookEditModalVisible(true);
   };
@@ -122,7 +126,12 @@ export default function BookDetails() {
   const handleBookEditSave = (data: BookEditData) => {
     if (!book) return;
 
-    const baseBook = modifiedBook || book;
+    if (modifiedBook && modifiedBook.id !== book.id) {
+      setModifiedBook(null);
+      setHasModifications(false);
+    }
+
+    const baseBook = modifiedBook || { ...book };
     const updatedBook = { ...baseBook };
     
     switch (data.type) {
@@ -138,7 +147,14 @@ export default function BookDetails() {
     }
 
     setModifiedBook(updatedBook);
-    setHasModifications(true);
+    
+    const hasModifications = (
+      updatedBook.userRating !== book.userRating ||
+      updatedBook.userStatus !== book.userStatus ||
+      updatedBook.userCurrentVolume !== book.userCurrentVolume
+    );
+    
+    setHasModifications(hasModifications);
   };
 
   const closeBookEditModal = () => {
@@ -148,10 +164,21 @@ export default function BookDetails() {
 
   // Sauvegarder les modifications avant de quitter la page
   const saveModificationsBeforeLeaving = async () => {
-    if (!hasModifications || !modifiedBook || !jwtToken) return;
+    if (!hasModifications || !modifiedBook || !jwtToken || !book) return;
+
+    const finalCheck = (
+      modifiedBook.userRating !== book.userRating ||
+      modifiedBook.userStatus !== book.userStatus ||
+      modifiedBook.userCurrentVolume !== book.userCurrentVolume
+    );
+
+    if (!finalCheck) {
+      //aucune modif = pas d'appel api
+      return;
+    }
 
     try {
-      // Appel API en arrière-plan (ne pas attendre la réponse)
+      // Appel API en arrière-plan (on attend pas la réponse)
       apiClient.updateBook(modifiedBook, jwtToken).catch((error: any) => {
         console.error('Erreur lors de la sauvegarde des modifications:', error);
       });
@@ -209,31 +236,33 @@ export default function BookDetails() {
     );
   }
 
+  const displayBook = modifiedBook || book;
+
   return (
     <Screen>
       <Header 
         showBackButton 
         onBackPress={handleBackPress}
-        title={book.names && book.names.length > 0 ? book.names[0] : 'Sans titre'}
+        title={displayBook.names && displayBook.names.length > 0 ? displayBook.names[0] : 'Sans titre'}
       />
       
       <View style={styles.container}>
         <BookCoverAndMetadata 
-          book={book} 
+          book={displayBook} 
           isInLibrary={isInLibrary} 
           onToggleLibrary={handleToggleLibrary}
           onEditRating={openRatingModal}
           onEditStatus={openStatusModal}
           onEditVolume={openVolumeModal}
         />
-        <BookTags book={book} />
-        <BookSynopsis book={book} />
+        <BookTags book={displayBook} />
+        <BookSynopsis book={displayBook} />
         
-        {book.sameAuthorBooks && book.sameAuthorBooks.size > 0 && (
+        {displayBook.sameAuthorBooks && displayBook.sameAuthorBooks.size > 0 && (
           <View style={styles.section}>
             <SectionHeader title="Du même auteur" />
             <HorizontalBookList 
-              books={Array.from(book.sameAuthorBooks)} 
+              books={Array.from(displayBook.sameAuthorBooks)} 
               onBookPress={(book) => router.push({
                 pathname: '/(tabs)/book-details/[id]',
                 params: { id: book.id.toString(), from: 'book-details' }
@@ -250,7 +279,7 @@ export default function BookDetails() {
           onSave={handleBookEditSave}
           type={bookEditData.type}
           currentValue={bookEditData.value}
-          maxVolume={book.nbVolume}
+          maxVolume={displayBook.nbVolume}
         />
       )}
     </Screen>

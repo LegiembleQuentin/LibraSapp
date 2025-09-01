@@ -148,7 +148,6 @@ export default function BookEditModal({
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
         >
-          {/* Header */}
           <View style={styles.header}>
             <Text style={[styles.title, { color: theme.colors.white }]}>
               {getTitle()}
@@ -158,12 +157,10 @@ export default function BookEditModal({
             </TouchableOpacity>
           </View>
 
-          {/* Content */}
           <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
             {renderContent()}
           </ScrollView>
 
-          {/* Footer */}
           <View style={styles.footer}>
             <TouchableOpacity
               style={[styles.cancelButton, { borderColor: theme.colors.white }]}
@@ -275,7 +272,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  // Rating styles
   optionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -295,7 +291,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  // Status styles
   statusOption: {
     paddingHorizontal: 20,
     paddingVertical: 12,
@@ -309,7 +304,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  // Volume styles
   volumeOption: {
     width: 60,
     height: 50,

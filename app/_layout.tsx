@@ -23,7 +23,6 @@ export default function RootLayout() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
-      console.log('État d\'authentification changé:', user?.email || 'Aucun utilisateur');
       setUser(user);
     });
 

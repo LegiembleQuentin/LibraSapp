@@ -6,6 +6,7 @@ import { LoginUserDto, RegisterUserDto, LoginResponseDto } from '../api/types';
 
 const JWT_TOKEN_KEY = '@libras_jwt_token';
 const JWT_EXPIRES_KEY = '@libras_jwt_expires';
+const USER_PROFILE_KEY = '@libras_user_profile';
 
 export class AuthService {
   // Connexion hybride : Firebase + API
@@ -21,6 +22,9 @@ export class AuthService {
 
       // 3. Stocker le token JWT
       await this.storeJwtToken(apiResponse.token, apiResponse.expiresIn);
+
+      // 4. Stocker l'email utilisateur (local)
+      await this.storeUserEmail(email);
 
       return {
         firebaseUser,
@@ -45,6 +49,9 @@ export class AuthService {
 
       // 3. Stocker le token JWT
       await this.storeJwtToken(apiResponse.token, apiResponse.expiresIn);
+
+      // 4. Stocker l'email utilisateur (local)
+      await this.storeUserEmail(email);
 
       return {
         firebaseUser,
@@ -81,6 +88,19 @@ export class AuthService {
       [JWT_TOKEN_KEY, token],
       [JWT_EXPIRES_KEY, expirationTime.toString()],
     ]);
+  }
+
+  // Sauvegarde (ou mise à jour) de l'email utilisateur dans le profil local
+  private async storeUserEmail(email: string): Promise<void> {
+    try {
+      const raw = await AsyncStorage.getItem(USER_PROFILE_KEY);
+      const existing = raw ? JSON.parse(raw) : {};
+      const updated = { ...existing, email };
+      await AsyncStorage.setItem(USER_PROFILE_KEY, JSON.stringify(updated));
+    } catch (e) {
+      // En cas d'erreur de stockage, on ne bloque pas le flux d'authentification
+      console.warn('Impossible de stocker l\'email utilisateur localement');
+    }
   }
 
   async getJwtToken(): Promise<string | null> {

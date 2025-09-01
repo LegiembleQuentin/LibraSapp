@@ -20,7 +20,7 @@ export default function PrimaryButton({ title, onPress, disabled }: Props) {
         { opacity: disabled ? 0.5 : pressed ? 0.7 : 1 },
       ]}
     >
-      <Text style={[styles.label, { color: theme.colors.accent, fontFamily: theme.fonts.heading }]}>
+      <Text style={[styles.label, { color: theme.colors.accent}]}>
         {title}
       </Text>
     </Pressable>

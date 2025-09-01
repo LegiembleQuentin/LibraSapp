@@ -9,6 +9,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../services/api/client';
 import { useScanContext } from '../../contexts/ScanContext';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as FileSystem from 'expo-file-system';
 
 // Constantes pour les dimensions du scanFrame
 const SCAN_FRAME_WIDTH = 300;
@@ -27,6 +28,7 @@ export default function ScanPage() {
   const cameraRef = useRef<CameraView>(null);
   const [cameraLayout, setCameraLayout] = useState({ width: 0, height: 0 });
   const [showNoBookModal, setShowNoBookModal] = useState(false);
+  const [rawImageUri, setRawImageUri] = useState<string | null>(null);
   
   const [permission, requestPermission] = useCameraPermissions();
 
@@ -38,6 +40,8 @@ export default function ScanPage() {
           quality: 0.8,
           base64: false,
         });
+
+        setRawImageUri(photo.uri);
 
         // Calculer le ratio de l'image et prendre seulement la partie scannée en qualité reduite pour l'envoi
         const { width: imageWidth, height: imageHeight } = photo;
@@ -110,24 +114,27 @@ export default function ScanPage() {
       setIsScanning(false);
       setIsProcessing(false);
       setCameraKey(prev => prev + 1);
+      setRawImageUri(null);
       
     }, [])
   );
 
   const processAndSendImage = async () => {
-    if (!capturedImage || !jwtToken) return;
+    if (!capturedImage && !rawImageUri) return;
 
     try {
       setIsProcessing(true);
+      const imageToCleanup = capturedImage;
+      const rawToCleanup = rawImageUri;
       
       const formData = new FormData();
       formData.append('image', {
-        uri: capturedImage,
+        uri: capturedImage || '',
         type: 'image/jpeg',
         name: 'cover.jpg',
       } as any);
 
-      const response = await apiClient.scanCover(formData, jwtToken);
+      const response = await apiClient.scanCover(formData, jwtToken!);
       
       if (typeof response === 'string') {
         if (response === "") {
@@ -162,6 +169,16 @@ export default function ScanPage() {
       console.error('Erreur lors du scan:', error);
       Alert.alert('Erreur', 'Impossible de traiter l\'image');
     } finally {
+      const imageToCleanup = capturedImage;
+      const rawToCleanup = rawImageUri;
+      if (imageToCleanup) {
+        try { await FileSystem.deleteAsync(imageToCleanup, { idempotent: true }); } catch {}
+      }
+      if (rawToCleanup) {
+        try { await FileSystem.deleteAsync(rawToCleanup, { idempotent: true }); } catch {}
+      }
+      setCapturedImage(null);
+      setRawImageUri(null);
       setIsProcessing(false);
     }
   };
@@ -284,8 +301,7 @@ export default function ScanPage() {
               style={[styles.modalButton, { backgroundColor: theme.colors.accent }]}
               onPress={() => setShowNoBookModal(false)}
             >
-              <Text style={[styles.modalButtonText, { color: 'black' }]}>
-                Réessayer
+              <Text style={[styles.modalButtonText, { color: 'black' }]}>        Réessayer
               </Text>
             </TouchableOpacity>
           </LinearGradient>

@@ -337,13 +337,12 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     paddingHorizontal: 10,
-    gap: 8,
+    gap: 32,
   },
   cardContainer: {
     width: CARD_WIDTH,
-    marginBottom: 16,
     alignItems: 'center',
   },
   list: {

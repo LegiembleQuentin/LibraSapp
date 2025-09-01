@@ -75,11 +75,11 @@ export default function ForYouContent({ discoverData, onBookPress }: ForYouConte
         </View>
       )}
 
-      {discoverData?.userInProgress && discoverData.userInProgress.length > 0 && (
+      {discoverData?.inProgress && discoverData.inProgress.length > 0 && (
         <View style={styles.section}>
           <SectionHeader title="En cours" />
           <HorizontalBookList
-            books={discoverData.userInProgress}
+            books={discoverData.inProgress}
             variant="compact"
             onBookPress={onBookPress}
           />
