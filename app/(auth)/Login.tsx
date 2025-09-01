@@ -66,50 +66,52 @@ const Login = () => {
         router.push('/(auth)/Register' as any);
     }
 
+    const goToForgotPassword = () => {
+        router.push({ pathname: '/(options)/user-edit', params: { mode: 'forgotPassword', from: 'login', email } } as any);
+    }
 
 
-  const { theme } = useTheme();
+    const { theme } = useTheme();
 
-  return (
-    <Screen center>
-      <View style={styles.container}>
-        <Text style={[styles.title, { color: theme.colors.textPrimary, fontFamily: theme.fonts.heading }]}>Connexion</Text>
+    return (
+        <Screen center>
+            <View style={styles.container}>
+                <Text style={[styles.title, { color: theme.colors.textPrimary, fontFamily: theme.fonts.heading }]}>Connexion</Text>
 
-        <View style={styles.inputContainer}>
-          <Input
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-            error={emailError}
-          />
-          <Input
-            placeholder="Mot de passe"
-            secureTextEntry={true}
-            value={password}
-            onChangeText={setPassword}
-            autoComplete="password"
-            error={passwordError}
-          />
-        </View>
+                <View style={styles.inputContainer}>
+                    <Input
+                        placeholder="Email"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        autoComplete="email"
+                        error={emailError}
+                    />
+                    <Input
+                        placeholder="Mot de passe"
+                        secureTextEntry={true}
+                        value={password}
+                        onChangeText={setPassword}
+                        autoComplete="password"
+                        error={passwordError}
+                    />
+                </View>
 
-        <View style={styles.buttonContainer}>
-          <PrimaryButton
-            title={loading ? 'Connexion...' : 'Valider'}
-            onPress={handleLogin}
-            disabled={loading}
-          />
-
-          <View style={styles.linkContainer}>
-            <Text style={[styles.linkText, { color: theme.colors.textPrimary }]}>Vous n'avez pas de compte ?</Text>
-            <LinkButton title="S'inscrire" onPress={goToRegister} />
-          </View>
-        </View>
-      </View>
-    </Screen>
-  )
+                <View style={styles.buttonContainer}>
+                    <PrimaryButton
+                        title={loading ? 'Connexion...' : 'Valider'}
+                        onPress={handleLogin}
+                        disabled={loading}
+                    />
+                    <LinkButton title={'Mot de passe oublié ?'} onPress={goToForgotPassword} />
+                    <View style={styles.linkContainer}>
+                        <LinkButton title="S'inscrire" onPress={goToRegister} />
+                    </View>
+                </View>
+            </View>
+        </Screen>
+    )
 }
 
 const styles = StyleSheet.create({

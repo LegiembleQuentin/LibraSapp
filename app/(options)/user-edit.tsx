@@ -8,6 +8,8 @@ import { useTheme } from '../../theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail, updatePassword } from 'firebase/auth';
+import Header from '../../components/ui/Header';
+import { router, useLocalSearchParams } from 'expo-router';
 
 const USER_PROFILE_KEY = '@libras_user_profile';
 
@@ -15,6 +17,8 @@ type Mode = 'profile' | 'changePassword' | 'forgotPassword';
 
 export default function UserEdit() {
   const { theme } = useTheme();
+  const params = useLocalSearchParams<{ mode?: string; from?: string; email?: string }>();
+  const [fromLogin, setFromLogin] = useState(false);
 
   const [email, setEmail] = useState('');
   const [country, setCountry] = useState('');
@@ -62,6 +66,21 @@ export default function UserEdit() {
     };
     loadProfile();
   }, []);
+
+  useEffect(() => {
+    const initialMode = typeof params.mode === 'string' ? params.mode : undefined;
+    const initialFrom = typeof params.from === 'string' ? params.from : undefined;
+    const initialEmail = typeof params.email === 'string' ? params.email : undefined;
+    if (initialMode === 'forgotPassword') {
+      setMode('forgotPassword');
+    }
+    if (initialFrom === 'login') {
+      setFromLogin(true);
+    }
+    if (initialEmail) {
+      setResetEmail(initialEmail);
+    }
+  }, [params]);
 
   const handleSaveProfile = async () => {
     setEmailError('');
@@ -267,13 +286,16 @@ export default function UserEdit() {
       </View>
       <View style={styles.buttonContainer}>
         <PrimaryButton title={loading ? 'Envoi...' : 'Envoyer le lien'} onPress={handleForgotPassword} disabled={loading} />
-        <LinkButton title={'Retour'} onPress={() => setMode('changePassword')} />
+        {!fromLogin && (
+          <LinkButton title={'Retour'} onPress={() => setMode('changePassword')} />
+        )}
       </View>
     </>
   );
 
   return (
-    <Screen center>
+    <Screen>
+      <Header showBackButton onBackPress={() => router.back()} />
       <View style={styles.container}>
         {mode === 'profile' && renderProfile()}
         {mode === 'changePassword' && renderChangePassword()}
@@ -285,6 +307,8 @@ export default function UserEdit() {
 
 const styles = StyleSheet.create({
   container: {
+    flexGrow: 1,
+    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 12,
   },
