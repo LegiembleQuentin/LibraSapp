@@ -6,6 +6,7 @@ import PrimaryButton from '../../components/ui/PrimaryButton';
 import OptionItem from '../../components/ui/OptionItem';
 import { authService } from '../../services/auth/authService';
 import { router } from 'expo-router';
+import Header from '@/components/ui/Header';
 
 export default function Options() {
   const { theme } = useTheme();
@@ -25,7 +26,7 @@ export default function Options() {
   return (
     <Screen>
       <View style={styles.container}>
-        <Text style={[styles.title, { color: theme.colors.textPrimary, fontFamily: theme.fonts.heading }]}>Options</Text>
+        <Header showBackButton={false} title="Paramètres" />
         
         <ScrollView style={styles.optionsContainer} showsVerticalScrollIndicator={false}>
           <OptionItem
