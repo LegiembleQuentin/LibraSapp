@@ -18,12 +18,22 @@ export default function Options() {
     router.push('/(options)/mentions-legales');
   };
 
+  const handleUserEdit = () => {
+    router.push('/(options)/user-edit');
+  };
+
   return (
     <Screen>
       <View style={styles.container}>
         <Text style={[styles.title, { color: theme.colors.textPrimary, fontFamily: theme.fonts.heading }]}>Options</Text>
         
         <ScrollView style={styles.optionsContainer} showsVerticalScrollIndicator={false}>
+          <OptionItem
+            title="Modifier mes informations"
+            subtitle="Email, pays, âge et mot de passe"
+            onPress={handleUserEdit}
+          />
+
           <OptionItem
             title="Conditions Générales d'Utilisation"
             subtitle="Lire les CGU de l'application"

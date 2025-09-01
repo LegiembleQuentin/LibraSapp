@@ -13,6 +13,7 @@ export default function OptionsLayout() {
     >
       <Stack.Screen name="cgu" />
       <Stack.Screen name="mentions-legales" />
+      <Stack.Screen name="user-edit" />
     </Stack>
   );
 }
